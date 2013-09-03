@@ -228,6 +228,16 @@ describe('Compiler', function () {
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
           );
         });
+
+        it('should compile elements back in escaped expressions', function () {
+          var template = DOMBars.compile('<div>{{test}}</div>')({
+            test: document.createElement('div')
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal(
+            '<div>&lt;div&gt;&lt;/div&gt;</div>'
+          );
+        });
       });
     });
   });

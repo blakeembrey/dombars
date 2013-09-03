@@ -115,7 +115,6 @@ Compiler.prototype = Handlebars.createFrame(Handlebars.Compiler.prototype);
 Compiler.prototype.compiler = Compiler;
 
 Compiler.prototype.DOM_ELEMENT = function (node) {
-  // Generate the element node
   this.opcode('pushProgram', this.compileProgram(node.name, {
     attribute: true
   }));
@@ -135,7 +134,7 @@ Compiler.prototype.DOM_ELEMENT = function (node) {
   this.opcode('pushProgram', this.compileProgram(node.content));
   this.opcode('invokeContent');
 
-  this.opcode('append');
+  this.opcode('appendElement');
 };
 
 Compiler.prototype.DOM_COMMENT = function (node) {
@@ -143,7 +142,7 @@ Compiler.prototype.DOM_COMMENT = function (node) {
     attribute: true
   }));
   this.opcode('invokeComment');
-  this.opcode('append');
+  this.opcode('appendElement');
 };
 
 Compiler.prototype.domAttribute = function (name, value) {
@@ -220,35 +219,23 @@ DOMCompiler.prototype.initializeBuffer = function () {
   return 'document.createDocumentFragment()';
 };
 
-DOMCompiler.prototype.appendContent = function (content) {
-  var string = this.quotedString(content);
-  if (!this.isAttribute) { string = 'document.createTextNode(' + string + ')'; }
-  this.source.push(this.appendToBuffer(string));
-};
-
-DOMCompiler.prototype.appendEscaped = function () {
-  if (this.isAttribute) { return JSCompiler.appendEscaped.call(this); }
-
-  var node = 'document.createTextNode(' + this.popStack() + ')';
-  this.source.push(this.appendToBuffer(node));
-};
-
 DOMCompiler.prototype.mergeSource = function () {
   if (this.isAttribute) { return JSCompiler.mergeSource.call(this); }
 
   return this.source.join('\n  ');
 };
 
-DOMCompiler.prototype.append = function() {
+DOMCompiler.prototype.append = function () {
   if (this.isAttribute) { return JSCompiler.append.call(this); }
 
   this.flushInline();
   var local = this.popStack();
 
-  this.context.aliases.domify = 'this.domify';
+  this.context.aliases.domify    = 'this.domify';
+  this.context.aliases.isElement = 'this.isElement';
 
   this.source.push('if (' + local + '|| ' + local + ' === 0) {');
-  this.source.push('  if (' + local + ' instanceof Node) {');
+  this.source.push('  if (isElement(' + local + ')) {');
   this.source.push('    ' + this.appendToBuffer(local));
   this.source.push('  } else {');
   this.source.push('    ' + this.appendToBuffer('domify(' + local + ')'));
@@ -258,6 +245,35 @@ DOMCompiler.prototype.append = function() {
   if (this.environment.isSimple) {
     this.source.push('else { return ' + this.initializeBuffer() + '; }');
   }
+};
+
+DOMCompiler.prototype.appendContent = function (content) {
+  var string = this.quotedString(content);
+  if (!this.isAttribute) { string = 'document.createTextNode(' + string + ')'; }
+  this.source.push(this.appendToBuffer(string));
+};
+
+DOMCompiler.prototype.appendEscaped = function () {
+  if (this.isAttribute) { return JSCompiler.appendEscaped.call(this); }
+
+  var local = this.popStack();
+
+  this.context.aliases.undomify  = 'this.undomify';
+  this.context.aliases.isElement = 'this.isElement';
+
+  this.source.push('if (isElement(' + local + ')) {');
+  this.source.push('  ' + this.appendToBuffer(
+    'document.createTextNode(undomify(' + local + '))'
+  ));
+  this.source.push('} else {');
+  this.source.push('  ' + this.appendToBuffer(
+    'document.createTextNode(' + local + ')'
+  ));
+  this.source.push('}');
+};
+
+DOMCompiler.prototype.appendElement = function () {
+  this.source.push(this.appendToBuffer(this.popStack()));
 };
 
 DOMCompiler.prototype.invokeComment = function () {
@@ -389,6 +405,8 @@ exports.attach = function(DOMBars) {
   DOMBars.VM.template = DOMBars.template = function (templateSpec) {
     var container = {
       domify: DOMBars.Utils.domify,
+      undomify: DOMBars.Utils.undomify,
+      isElement: DOMBars.Utils.isElement,
       invokePartial: DOMBars.VM.invokePartial,
       escapeExpression: DOMBars.Utils.escapeExpression,
       programs: [],
@@ -453,6 +471,23 @@ exports.attach = function (DOMBars) {
 
   DOMBars.Utils.domify = function (string) {
     return domify(string);
+  };
+
+  DOMBars.Utils.undomify = function (node) {
+    if (node.outerHTML) { return node.outerHTML; }
+
+    var div = document.createElement('div');
+    var innerHTML;
+
+    div.appendChild(node.cloneNode(true));
+    innerHTML = div.innerHTML;
+    div       = null;
+
+    return innerHTML;
+  };
+
+  DOMBars.Utils.isElement = function (element) {
+    return element instanceof Node;
   };
 };
 
