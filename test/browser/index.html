@@ -1,0 +1,28 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Mocha Spec Runner</title>
+  <link rel="stylesheet" href="../../node_modules/mocha/mocha.css">
+</head>
+<body>
+  <div id="mocha"></div>
+  <div id="fixture"></div>
+
+  <script src="../../node_modules/mocha/mocha.js"></script>
+  <script src="../../node_modules/chai/chai.js"></script>
+  <script>
+    mocha.setup('bdd');
+    mocha.reporter('html');
+    expect = chai.expect;
+  </script>
+
+  <script src="../../dombars.bundle.js"></script>
+
+  <script src="spec/compiler.js"></script>
+
+  <script>
+    (window.mochaPhantomJS || window.mocha).run();
+  </script>
+</body>
+</html>
