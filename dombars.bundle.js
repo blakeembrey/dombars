@@ -13,13 +13,14 @@ var create = function create () {
   runtime.attach(db);
 
   db.create = create;
+  db.Handlebars = require('handlebars');
 
   return db;
 };
 
 var DOMBars = module.exports = create();
 
-},{"./dombars/base":2,"./dombars/compiler":7,"./dombars/runtime":11,"./dombars/utils":12}],2:[function(require,module,exports){
+},{"./dombars/base":2,"./dombars/compiler":7,"./dombars/runtime":11,"./dombars/utils":12,"handlebars":18}],2:[function(require,module,exports){
 var base = require('handlebars/lib/handlebars/base');
 
 module.exports = base;
@@ -231,15 +232,11 @@ DOMCompiler.prototype.append = function () {
   this.flushInline();
   var local = this.popStack();
 
-  this.context.aliases.domify    = 'this.domify';
+  this.context.aliases.domify    = 'this.domifyExpression';
   this.context.aliases.isElement = 'this.isElement';
 
   this.source.push('if (' + local + '|| ' + local + ' === 0) {');
-  this.source.push('  if (isElement(' + local + ')) {');
-  this.source.push('    ' + this.appendToBuffer(local));
-  this.source.push('  } else {');
-  this.source.push('    ' + this.appendToBuffer('domify(' + local + ')'));
-  this.source.push('  }');
+  this.source.push('  ' + this.appendToBuffer('domify(' + local + ')'));
   this.source.push('}');
 
   if (this.environment.isSimple) {
@@ -258,18 +255,10 @@ DOMCompiler.prototype.appendEscaped = function () {
 
   var local = this.popStack();
 
-  this.context.aliases.undomify  = 'this.undomify';
+  this.context.aliases.textify   = 'this.textifyExpression';
   this.context.aliases.isElement = 'this.isElement';
 
-  this.source.push('if (isElement(' + local + ')) {');
-  this.source.push('  ' + this.appendToBuffer(
-    'document.createTextNode(undomify(' + local + '))'
-  ));
-  this.source.push('} else {');
-  this.source.push('  ' + this.appendToBuffer(
-    'document.createTextNode(' + local + ')'
-  ));
-  this.source.push('}');
+  this.source.push(this.appendToBuffer('textify(' + local + ')'));
 };
 
 DOMCompiler.prototype.appendElement = function () {
@@ -404,9 +393,9 @@ exports.attach = function(DOMBars) {
 
   DOMBars.VM.template = DOMBars.template = function (templateSpec) {
     var container = {
-      domify: DOMBars.Utils.domify,
-      undomify: DOMBars.Utils.undomify,
       isElement: DOMBars.Utils.isElement,
+      domifyExpression: DOMBars.Utils.domifyExpression,
+      textifyExpression: DOMBars.Utils.textifyExpression,
       invokePartial: DOMBars.VM.invokePartial,
       escapeExpression: DOMBars.Utils.escapeExpression,
       programs: [],
@@ -469,25 +458,41 @@ var domify = require('domify');
 exports.attach = function (DOMBars) {
   utils.attach(DOMBars);
 
-  DOMBars.Utils.domify = function (string) {
-    return domify(string);
-  };
-
-  DOMBars.Utils.undomify = function (node) {
-    if (node.outerHTML) { return node.outerHTML; }
-
-    var div = document.createElement('div');
-    var innerHTML;
-
-    div.appendChild(node.cloneNode(true));
-    innerHTML = div.innerHTML;
-    div       = null;
-
-    return innerHTML;
-  };
-
   DOMBars.Utils.isElement = function (element) {
     return element instanceof Node;
+  };
+
+  DOMBars.Utils.domifyExpression = function (string) {
+    if (DOMBars.Utils.isElement(string)) { return string; }
+
+    try {
+      return domify(string.toString());
+    } catch (e) {
+      return document.createTextNode(string);
+    }
+  };
+
+  DOMBars.Utils.textifyExpression = function (string) {
+    if (string instanceof DOMBars.SafeString) {
+      return DOMBars.Utils.domifyExpression(string.toString());
+    }
+
+    if (DOMBars.Utils.isElement(string)) {
+      if (string.outerHTML) {
+        return document.createTextNode(string.outerHTML);
+      }
+
+      var div = document.createElement('div');
+      var outerHTML;
+
+      div.appendChild(string.cloneNode(true));
+      outerHTML = div.innerHTML;
+      div       = null;
+
+      return document.createTextNode(outerHTML);
+    }
+
+    return document.createTextNode(string);
   };
 };
 

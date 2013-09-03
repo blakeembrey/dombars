@@ -219,6 +219,14 @@ describe('Compiler', function () {
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
 
+        it('should compile unescaped text expressions', function () {
+          var template = DOMBars.compile('<div>{{{test}}}</div>')({
+            test: 'text'
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div>text</div>');
+        });
+
         it('should not compile escape expressions', function () {
           var template = DOMBars.compile('<div>{{test}}</div>')({
             test: '<div></div>'
@@ -237,6 +245,16 @@ describe('Compiler', function () {
           expect(fixture.innerHTML).to.equal(
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
           );
+        });
+      });
+
+      describe('SafeString', function () {
+        it('should domify a safe string', function () {
+          var template = DOMBars.compile('<div>{{test}}</div>')({
+            test: new DOMBars.SafeString('<div></div>')
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
       });
     });
