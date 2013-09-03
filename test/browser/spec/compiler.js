@@ -210,6 +210,24 @@ describe('Compiler', function () {
             '<div>test <div></div> expression</div>'
           );
         });
+
+        it('should compile unescaped expressions', function () {
+          var template = DOMBars.compile('<div>{{{test}}}</div>')({
+            test: '<div></div>'
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div><div></div></div>');
+        });
+
+        it('should not compile escape expressions', function () {
+          var template = DOMBars.compile('<div>{{test}}</div>')({
+            test: '<div></div>'
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal(
+            '<div>&lt;div&gt;&lt;/div&gt;</div>'
+          );
+        });
       });
     });
   });
