@@ -20,12 +20,12 @@ var create = function create () {
 
 var DOMBars = module.exports = create();
 
-},{"./dombars/base":2,"./dombars/compiler":7,"./dombars/runtime":11,"./dombars/utils":12,"handlebars":18}],2:[function(require,module,exports){
+},{"./dombars/base":2,"./dombars/compiler":8,"./dombars/runtime":12,"./dombars/utils":13,"handlebars":19}],2:[function(require,module,exports){
 var base = require('handlebars/lib/handlebars/base');
 
 module.exports = base;
 
-},{"handlebars/lib/handlebars/base":19}],3:[function(require,module,exports){
+},{"handlebars/lib/handlebars/base":20}],3:[function(require,module,exports){
 var ast = require('handlebars/lib/handlebars/compiler/ast');
 
 exports.attach = function (DOMBars) {
@@ -52,7 +52,15 @@ exports.attach = function (DOMBars) {
   return DOMBars;
 };
 
-},{"handlebars/lib/handlebars/compiler/ast":20}],4:[function(require,module,exports){
+},{"handlebars/lib/handlebars/compiler/ast":21}],4:[function(require,module,exports){
+var Handlebars = require('handlebars');
+var JSCompiler = Handlebars.JavaScriptCompiler.prototype;
+
+var Compiler = module.exports = function () {};
+Compiler.prototype = Handlebars.createFrame(JSCompiler);
+Compiler.prototype.compiler = Compiler;
+
+},{"handlebars":19}],5:[function(require,module,exports){
 var base = require('handlebars/lib/handlebars/compiler/base');
 
 exports.attach = function (DOMBars) {
@@ -108,27 +116,22 @@ exports.attach = function (DOMBars) {
   return DOMBars;
 };
 
-},{"./compiler":5,"./dom-compiler":6,"./parser":8,"handlebars/lib/handlebars/compiler/base":21}],5:[function(require,module,exports){
+},{"./compiler":6,"./dom-compiler":7,"./parser":9,"handlebars/lib/handlebars/compiler/base":22}],6:[function(require,module,exports){
 var Handlebars = require('handlebars');
+var JSCompiler = Handlebars.Compiler.prototype;
 
 var Compiler = module.exports = function () {};
-Compiler.prototype = Handlebars.createFrame(Handlebars.Compiler.prototype);
+Compiler.prototype = Handlebars.createFrame(JSCompiler);
 Compiler.prototype.compiler = Compiler;
 
 Compiler.prototype.DOM_ELEMENT = function (node) {
-  this.opcode('pushProgram', this.compileProgram(node.name, {
-    attribute: true
-  }));
+  this.opcode('pushProgram', this.compileAttribute(node.name));
   this.opcode('invokeElement');
 
   var name, value;
   for (var i = 0, l = node.attributes.length; i < l; i++) {
-    name = this.compileProgram(node.attributes[i].name, {
-      attribute: true
-    });
-    value = this.compileProgram(node.attributes[i].value, {
-      attribute: true
-    });
+    name  = this.compileAttribute(node.attributes[i].name);
+    value = this.compileAttribute(node.attributes[i].value);
     this.domAttribute(name, value);
   }
 
@@ -139,9 +142,7 @@ Compiler.prototype.DOM_ELEMENT = function (node) {
 };
 
 Compiler.prototype.DOM_COMMENT = function (node) {
-  this.opcode('pushProgram', this.compileProgram(node.comment, {
-    attribute: true
-  }));
+  this.opcode('pushProgram', this.compileAttribute(node.comment));
   this.opcode('invokeComment');
   this.opcode('appendElement');
 };
@@ -157,82 +158,82 @@ Compiler.prototype.comment = function () {
   this.opcode('appendComment');
 };
 
-Compiler.prototype.compileProgram = function (program, options) {
-  var compileOptions = {};
-  Handlebars.Utils.extend(compileOptions, this.options);
-  Handlebars.Utils.extend(compileOptions, options);
-
-  var guid   = this.guid++;
-  var result = new this.compiler().compile(program, compileOptions);
-  var depth;
-
-  this.usePartial     = this.usePartial || result.usePartial;
-  this.children[guid] = result;
-
-  for (var i = 0, l = result.depths.list.length; i < l; i++) {
-    depth = result.depths.list[i];
-
-    if (depth < 2) {
-      continue;
-    } else {
-      this.addDepth(depth - 1);
-    }
-  }
-
+Compiler.prototype.compileAttribute = function (program) {
+  var guid = JSCompiler.compileProgram.call(this, program);
+  this.children[guid].attribute = true;
   return guid;
 };
 
-},{"handlebars":18}],6:[function(require,module,exports){
+},{"handlebars":19}],7:[function(require,module,exports){
 var Handlebars = require('handlebars');
 var JSCompiler = Handlebars.JavaScriptCompiler.prototype;
 
-var DOMCompiler = module.exports = function () {};
-DOMCompiler.prototype = Handlebars.createFrame(JSCompiler);
-DOMCompiler.prototype.compiler = DOMCompiler;
+var Compiler = module.exports = function () {};
+Compiler.prototype = Handlebars.createFrame(JSCompiler);
+Compiler.prototype.compiler    = Compiler;
+Compiler.prototype.attrComiler = require('./attribute-compiler');
 
-DOMCompiler.prototype.compile = function (environment) {
-  // Set a boolean flag to indicate which context of logic we should be execute.
-  this.isAttribute = !!(environment.options && environment.options.attribute);
+Compiler.prototype.compile = function (environment) {
   this.elementSlot = 0;
   return JSCompiler.compile.apply(this, arguments);
 };
 
-DOMCompiler.prototype.pushElement = function () {
-  return 'element' + (++this.elementSlot);
-}
+Compiler.prototype.compileChildren = function(environment, options) {
+  var children = environment.children
+  var child, compiler, program, index;
 
-DOMCompiler.prototype.popElement = function () {
-  return 'element' + (this.elementSlot--);
-}
+  for (var i = 0, l = children.length; i < l; i++) {
+    child    = children[i];
+    index    = this.matchExistingProgram(child);
+    compiler = this.compiler;
 
-DOMCompiler.prototype.topElement = function () {
-  return 'element' + this.elementSlot;
-}
+    if (child.attribute) {
+      compiler = this.attrComiler;
+    }
 
-DOMCompiler.prototype.appendToBuffer = function (string) {
-  if (this.environment.isSimple) {
-    return 'return ' + string + ';';
-  } else if (!this.isAttribute) {
-    return 'buffer.appendChild(' + string + ');';
-  } else {
-    return JSCompiler.appendToBuffer.call(this, string);
+    if (index == null) {
+      this.context.programs.push('');
+      child.index = index = this.context.programs.length;
+      child.name  = 'program' + index;
+      program = (new compiler()).compile(child, options, this.context);
+      this.context.programs[index]     = program;
+      this.context.environments[index] = child;
+    } else {
+      child.index = index;
+      child.name  = 'program' + index;
+    }
   }
 };
 
-DOMCompiler.prototype.initializeBuffer = function () {
-  if (this.isAttribute) { return this.quotedString(''); }
+Compiler.prototype.pushElement = function () {
+  return 'element' + (++this.elementSlot);
+}
+
+Compiler.prototype.popElement = function () {
+  return 'element' + (this.elementSlot--);
+}
+
+Compiler.prototype.topElement = function () {
+  return 'element' + this.elementSlot;
+}
+
+Compiler.prototype.appendToBuffer = function (string) {
+  if (this.environment.isSimple) {
+    return 'return ' + string + ';';
+  }
+
+  return 'buffer.appendChild(' + string + ');';
+};
+
+Compiler.prototype.initializeBuffer = function () {
   return 'document.createDocumentFragment()';
 };
 
-DOMCompiler.prototype.mergeSource = function () {
-  if (this.isAttribute) { return JSCompiler.mergeSource.call(this); }
-
+Compiler.prototype.mergeSource = function () {
   return this.source.join('\n  ');
 };
 
-DOMCompiler.prototype.append = function () {
-  if (this.isAttribute) { return JSCompiler.append.call(this); }
-
+Compiler.prototype.append = function () {
   this.flushInline();
   var local = this.popStack();
 
@@ -248,19 +249,16 @@ DOMCompiler.prototype.append = function () {
   }
 };
 
-DOMCompiler.prototype.appendContent = function (content) {
-  var string = this.quotedString(content);
-  if (!this.isAttribute) { string = 'document.createTextNode(' + string + ')'; }
+Compiler.prototype.appendContent = function (content) {
+  var string = 'document.createTextNode(' + this.quotedString(content) + ')';
   this.source.push(this.appendToBuffer(string));
 };
 
-DOMCompiler.prototype.appendComment = function () {
+Compiler.prototype.appendComment = function () {
   this.source.push(this.appendToBuffer(this.initializeBuffer()));
 };
 
-DOMCompiler.prototype.appendEscaped = function () {
-  if (this.isAttribute) { return JSCompiler.appendEscaped.call(this); }
-
+Compiler.prototype.appendEscaped = function () {
   var local = this.popStack();
 
   this.context.aliases.textify   = 'this.textifyExpression';
@@ -269,17 +267,17 @@ DOMCompiler.prototype.appendEscaped = function () {
   this.source.push(this.appendToBuffer('textify(' + local + ')'));
 };
 
-DOMCompiler.prototype.appendElement = function () {
+Compiler.prototype.appendElement = function () {
   this.source.push(this.appendToBuffer(this.popStack()));
 };
 
-DOMCompiler.prototype.invokeComment = function () {
+Compiler.prototype.invokeComment = function () {
   this.replaceStack(function (current) {
     return 'document.createComment(' + current + '(depth0))';
   });
 };
 
-DOMCompiler.prototype.invokeElement = function () {
+Compiler.prototype.invokeElement = function () {
   var element = this.pushElement();
   var current = this.popStack();
 
@@ -289,7 +287,7 @@ DOMCompiler.prototype.invokeElement = function () {
   this.push(element);
 };
 
-DOMCompiler.prototype.invokeAttribute = function () {
+Compiler.prototype.invokeAttribute = function () {
   var element = this.topElement();
   var value   = this.popStack();
   var name    = this.popStack();
@@ -298,12 +296,12 @@ DOMCompiler.prototype.invokeAttribute = function () {
   this.source.push(element + '.setAttribute(' + params.join(',') + ');');
 };
 
-DOMCompiler.prototype.invokeContent = function () {
+Compiler.prototype.invokeContent = function () {
   var element = this.topElement();
   this.source.push(element + '.appendChild(' + this.popStack() + '(depth0))');
 };
 
-},{"handlebars":18}],7:[function(require,module,exports){
+},{"./attribute-compiler":4,"handlebars":19}],8:[function(require,module,exports){
 var ast     = require('./ast');
 var base    = require('./base');
 var printer = require('./printer');
@@ -318,7 +316,7 @@ exports.attach = function (DOMBars) {
   return DOMBars;
 };
 
-},{"./ast":3,"./base":4,"./printer":9,"./visitor":10}],8:[function(require,module,exports){
+},{"./ast":3,"./base":5,"./printer":10,"./visitor":11}],9:[function(require,module,exports){
 var HbsParser  = require('handlebars/lib/handlebars/compiler/parser');
 var HTMLParser = require('htmlparser2/lib/Parser');
 
@@ -383,17 +381,17 @@ Parser.prototype.parse = function (input) {
 
 module.exports = new Parser();
 
-},{"handlebars/lib/handlebars/compiler/parser":24,"htmlparser2/lib/Parser":29}],9:[function(require,module,exports){
+},{"handlebars/lib/handlebars/compiler/parser":25,"htmlparser2/lib/Parser":30}],10:[function(require,module,exports){
 var printer = require('handlebars/lib/handlebars/compiler/printer');
 
 module.exports = printer;
 
-},{"handlebars/lib/handlebars/compiler/printer":25}],10:[function(require,module,exports){
+},{"handlebars/lib/handlebars/compiler/printer":26}],11:[function(require,module,exports){
 var visitor = require('handlebars/lib/handlebars/compiler/visitor');
 
 module.exports = visitor;
 
-},{"handlebars/lib/handlebars/compiler/visitor":26}],11:[function(require,module,exports){
+},{"handlebars/lib/handlebars/compiler/visitor":27}],12:[function(require,module,exports){
 var runtime = require('handlebars/lib/handlebars/runtime');
 
 exports.attach = function(DOMBars) {
@@ -459,7 +457,7 @@ exports.attach = function(DOMBars) {
   };
 };
 
-},{"handlebars/lib/handlebars/runtime":27}],12:[function(require,module,exports){
+},{"handlebars/lib/handlebars/runtime":28}],13:[function(require,module,exports){
 var utils  = require('handlebars/lib/handlebars/utils');
 var domify = require('domify');
 
@@ -504,7 +502,7 @@ exports.attach = function (DOMBars) {
   };
 };
 
-},{"domify":17,"handlebars/lib/handlebars/utils":28}],13:[function(require,module,exports){
+},{"domify":18,"handlebars/lib/handlebars/utils":29}],14:[function(require,module,exports){
 var process=require("__browserify_process");if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -700,10 +698,10 @@ EventEmitter.listenerCount = function(emitter, type) {
   return ret;
 };
 
-},{"__browserify_process":16}],14:[function(require,module,exports){
+},{"__browserify_process":17}],15:[function(require,module,exports){
 // nothing to see here... no file methods for the browser
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -1050,7 +1048,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":13}],16:[function(require,module,exports){
+},{"events":14}],17:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1104,7 +1102,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
 /**
  * Expose `parse`.
@@ -1177,7 +1175,7 @@ function parse(html) {
   return fragment;
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var handlebars = require("./handlebars/base"),
 
 // Each of these augment the Handlebars object. No need to setup here.
@@ -1222,7 +1220,7 @@ if (require.extensions) {
 // var singleton = handlebars.Handlebars,
 //  local = handlebars.create();
 
-},{"./handlebars/base":19,"./handlebars/compiler":23,"./handlebars/runtime":27,"./handlebars/utils":28,"fs":14}],19:[function(require,module,exports){
+},{"./handlebars/base":20,"./handlebars/compiler":24,"./handlebars/runtime":28,"./handlebars/utils":29,"fs":15}],20:[function(require,module,exports){
 /*jshint eqnull: true */
 
 module.exports.create = function() {
@@ -1390,7 +1388,7 @@ Handlebars.registerHelper('log', function(context, options) {
 return Handlebars;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 exports.attach = function(Handlebars) {
 
 // BEGIN(BROWSER)
@@ -1530,7 +1528,7 @@ return Handlebars;
 };
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var handlebars = require("./parser");
 
 exports.attach = function(Handlebars) {
@@ -1553,7 +1551,7 @@ Handlebars.parse = function(input) {
 return Handlebars;
 };
 
-},{"./parser":24}],22:[function(require,module,exports){
+},{"./parser":25}],23:[function(require,module,exports){
 var compilerbase = require("./base");
 
 exports.attach = function(Handlebars) {
@@ -2860,7 +2858,7 @@ return Handlebars;
 
 
 
-},{"./base":21}],23:[function(require,module,exports){
+},{"./base":22}],24:[function(require,module,exports){
 // Each of these module will augment the Handlebars object as it loads. No need to perform addition operations
 module.exports.attach = function(Handlebars) {
 
@@ -2878,7 +2876,7 @@ return Handlebars;
 
 };
 
-},{"./ast":20,"./compiler":22,"./printer":25,"./visitor":26}],24:[function(require,module,exports){
+},{"./ast":21,"./compiler":23,"./printer":26,"./visitor":27}],25:[function(require,module,exports){
 // BEGIN(BROWSER)
 /* Jison generated parser */
 var handlebars = (function(){
@@ -3363,7 +3361,7 @@ return new Parser;
 
 module.exports = handlebars;
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 exports.attach = function(Handlebars) {
 
 // BEGIN(BROWSER)
@@ -3503,7 +3501,7 @@ return Handlebars;
 };
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 exports.attach = function(Handlebars) {
 
 // BEGIN(BROWSER)
@@ -3523,7 +3521,7 @@ return Handlebars;
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 exports.attach = function(Handlebars) {
 
 // BEGIN(BROWSER)
@@ -3631,7 +3629,7 @@ return Handlebars;
 
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 exports.attach = function(Handlebars) {
 
 var toString = Object.prototype.toString;
@@ -3716,7 +3714,7 @@ Handlebars.Utils = {
 return Handlebars;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var Tokenizer = require("./Tokenizer.js");
 
 /*
@@ -3988,7 +3986,7 @@ Parser.prototype.done = Parser.prototype.end;
 
 module.exports = Parser;
 
-},{"./Tokenizer.js":30,"events":13,"util":15}],30:[function(require,module,exports){
+},{"./Tokenizer.js":31,"events":14,"util":16}],31:[function(require,module,exports){
 module.exports = Tokenizer;
 
 var i = 0,
