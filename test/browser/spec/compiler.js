@@ -256,6 +256,38 @@ describe('Compiler', function () {
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
+
+        it('should function as usual with an unescaped mustache', function () {
+          var template = DOMBars.compile('<div>{{{test}}}</div>')({
+            test: new DOMBars.SafeString('<div></div>')
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div><div></div></div>');
+        });
+      });
+
+      describe('Comment Expression', function () {
+        it('should not output comment nodes in the template', function () {
+          var template = DOMBars.compile('<div>{{! comment }}</div>')();
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div></div>');
+        });
+
+        it('should not output comment nodes beside text', function () {
+          var template = DOMBars.compile('<div>text {{! comment }}</div>')();
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div>text </div>');
+        });
+      });
+
+      describe('Block Expressions', function () {
+        it('should compile block helpers', function () {
+          var template = DOMBars.compile('{{#test}}text{{/test}}')({
+            test: true
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('text');
+        });
       });
     });
   });

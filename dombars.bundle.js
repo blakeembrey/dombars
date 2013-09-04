@@ -153,6 +153,10 @@ Compiler.prototype.domAttribute = function (name, value) {
   this.opcode('invokeAttribute');
 };
 
+Compiler.prototype.comment = function () {
+  this.opcode('appendComment');
+};
+
 Compiler.prototype.compileProgram = function (program, options) {
   var compileOptions = {};
   Handlebars.Utils.extend(compileOptions, this.options);
@@ -248,6 +252,10 @@ DOMCompiler.prototype.appendContent = function (content) {
   var string = this.quotedString(content);
   if (!this.isAttribute) { string = 'document.createTextNode(' + string + ')'; }
   this.source.push(this.appendToBuffer(string));
+};
+
+DOMCompiler.prototype.appendComment = function () {
+  this.source.push(this.appendToBuffer(this.initializeBuffer()));
 };
 
 DOMCompiler.prototype.appendEscaped = function () {
