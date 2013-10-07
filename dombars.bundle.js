@@ -351,11 +351,34 @@ var stringifyProgram = function (program) {
     if (statement.type === 'content') {
       html += statement.string;
     } else {
-      html += '{{' + i + '}}'; // "Alias" node
+      html += '{{d' + i + '}}'; // "Alias" node
     }
   }
 
   return html;
+};
+
+/**
+ * Parses a text string returned from stringifying a program node. Replaces any
+ * mustache node references with the original node.
+
+ * @param  {String} input
+ * @param  {Object} originalProgram
+ * @return {Object}
+ */
+var parseProgram = function (input, originalProgram) {
+  var program    = HbsParser.parse(input);
+  var statements = program.statements;
+
+  for (var i = 0; i < statements.length; i++) {
+    var statement = statements[i];
+
+    if (statement.type === 'mustache') {
+      statements[i] = originalProgram.statements[statement.id.string.substr(1)];
+    }
+  }
+
+  return program;
 };
 
 /**
@@ -436,25 +459,27 @@ Parser.prototype.parse = function (input) {
     }
   });
 
-  parser.write(input);
+  parser.write(html);
   parser.end();
 
   var ast = stack[stack.length - 1];
 
   (function recurse (program) {
-    for (var i = 0; i < program.statements.length; i++) {
-      var statement = program.statements[i];
+    var statements = program.statements;
+
+    for (var i = 0; i < statements.length; i++) {
+      var statement = statements[i];
 
       if (statement.type === 'DOM_TEXT' || statement.type === 'DOM_COMMENT') {
-        statement.text = HbsParser.parse(statement.text);
+        statement.text = parseProgram(statement.text, hbsProgram);
       } else if (statement.type === 'DOM_ELEMENT') {
-        statement.name = HbsParser.parse(statement.name);
+        statement.name = parseProgram(statement.name, hbsProgram);
 
         for (var k = 0; k < statement.attributes.length; k++) {
           var attribute = statement.attributes[k];
 
-          attribute.name  = HbsParser.parse(attribute.name);
-          attribute.value = HbsParser.parse(attribute.value);
+          attribute.name  = parseProgram(attribute.name, hbsProgram);
+          attribute.value = parseProgram(attribute.value, hbsProgram);
         }
 
         recurse(statement.content);
