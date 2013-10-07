@@ -31,36 +31,32 @@ var ast = require('handlebars/lib/handlebars/compiler/ast');
 exports.attach = function (DOMBars) {
   ast.attach(DOMBars);
 
-  DOMBars.AST.DOMElementNode = function (name, attributes, content) {
-    this.type       = 'DOM_ELEMENT';
-    this.name       = name;
-    this.attributes = attributes;
-    this.content    = content;
-  };
-
-  DOMBars.AST.DOMAttributeNode = function (name, value) {
-    this.type  = 'DOM_ATTRIBUTE';
-    this.name  = name;
-    this.value = value;
-  };
-
-  DOMBars.AST.DOMCommentNode = function (comment) {
-    this.type    = 'DOM_COMMENT';
-    this.comment = comment;
+  DOMBars.AST.DOM = {
+    Element: function (name, attributes, content) {
+      this.type       = 'DOM_ELEMENT';
+      this.name       = name;
+      this.attributes = attributes;
+      this.content    = content;
+    },
+    Attribute: function (name, value) {
+      this.type  = 'DOM_ATTRIBUTE';
+      this.name  = name;
+      this.value = value;
+    },
+    Comment: function (text) {
+      this.type = 'DOM_COMMENT';
+      this.text = text;
+    },
+    Text: function (text) {
+      this.type = 'DOM_TEXT';
+      this.text = text;
+    }
   };
 
   return DOMBars;
 };
 
 },{"handlebars/lib/handlebars/compiler/ast":21}],4:[function(require,module,exports){
-var Handlebars = require('handlebars');
-var JSCompiler = Handlebars.JavaScriptCompiler.prototype;
-
-var Compiler = module.exports = function () {};
-Compiler.prototype = Handlebars.createFrame(JSCompiler);
-Compiler.prototype.compiler = Compiler;
-
-},{"handlebars":19}],5:[function(require,module,exports){
 var base = require('handlebars/lib/handlebars/compiler/base');
 
 exports.attach = function (DOMBars) {
@@ -69,8 +65,8 @@ exports.attach = function (DOMBars) {
   DOMBars.Parser = require('./parser');
   DOMBars.Parser.yy = DOMBars.AST;
 
-  var Compiler           = DOMBars.Compiler           = require('./compiler');
-  var JavaScriptCompiler = DOMBars.JavaScriptCompiler = require('./dom-compiler');
+  DOMBars.Compiler           = require('./compilers/base');
+  DOMBars.JavaScriptCompiler = require('./compilers/javascript');
 
   DOMBars.precompile = function (input, options) {
     if (input == null || (typeof input !== 'string' && input.constructor !== DOMBars.AST.ProgramNode)) {
@@ -83,8 +79,8 @@ exports.attach = function (DOMBars) {
     }
 
     var ast         = DOMBars.parse(input);
-    var environment = new Compiler().compile(ast, options);
-    return new JavaScriptCompiler().compile(environment, options);
+    var environment = new DOMBars.Compiler().compile(ast, options);
+    return new DOMBars.JavaScriptCompiler().compile(environment, options);
   };
 
   DOMBars.compile = function (input, options) {
@@ -98,10 +94,10 @@ exports.attach = function (DOMBars) {
     }
 
     var compiled;
-    function compile() {
+    var compile = function () {
       var ast = DOMBars.parse(input);
-      var environment = new Compiler().compile(ast, options);
-      var templateSpec = new JavaScriptCompiler().compile(environment, options, undefined, true);
+      var environment = new DOMBars.Compiler().compile(ast, options);
+      var templateSpec = new DOMBars.JavaScriptCompiler().compile(environment, options, undefined, true);
       return DOMBars.template(templateSpec);
     }
 
@@ -116,7 +112,15 @@ exports.attach = function (DOMBars) {
   return DOMBars;
 };
 
-},{"./compiler":6,"./dom-compiler":7,"./parser":9,"handlebars/lib/handlebars/compiler/base":22}],6:[function(require,module,exports){
+},{"./compilers/base":6,"./compilers/javascript":7,"./parser":9,"handlebars/lib/handlebars/compiler/base":22}],5:[function(require,module,exports){
+var Handlebars = require('handlebars');
+var JSCompiler = Handlebars.JavaScriptCompiler.prototype;
+
+var Compiler = module.exports = function () {};
+Compiler.prototype = Handlebars.createFrame(JSCompiler);
+Compiler.prototype.compiler = Compiler;
+
+},{"handlebars":19}],6:[function(require,module,exports){
 var Handlebars = require('handlebars');
 var JSCompiler = Handlebars.Compiler.prototype;
 
@@ -129,28 +133,31 @@ Compiler.prototype.DOM_ELEMENT = function (node) {
   this.opcode('invokeElement');
 
   var name, value;
-  for (var i = 0, l = node.attributes.length; i < l; i++) {
+  for (var i = 0, len = node.attributes.length; i < len; i++) {
     name  = this.compileAttribute(node.attributes[i].name);
     value = this.compileAttribute(node.attributes[i].value);
-    this.domAttribute(name, value);
+    this.appendAttribute(name, value);
   }
 
   this.opcode('pushProgram', this.compileProgram(node.content));
   this.opcode('invokeContent');
-
   this.opcode('appendElement');
 };
 
 Compiler.prototype.DOM_COMMENT = function (node) {
-  this.opcode('pushProgram', this.compileAttribute(node.comment));
+  this.opcode('pushProgram', this.compileAttribute(node.text));
   this.opcode('invokeComment');
   this.opcode('appendElement');
 };
 
-Compiler.prototype.domAttribute = function (name, value) {
+Compiler.prototype.DOM_TEXT = function (node) {
+  this.opcode('pushProgram', this.compileProgram(node.text));
+  this.opcode('appendProgram');
+};
+
+Compiler.prototype.appendAttribute = function (name, value) {
   this.opcode('pushProgram', name);
   this.opcode('pushProgram', value);
-
   this.opcode('invokeAttribute');
 };
 
@@ -171,7 +178,7 @@ var JSCompiler = Handlebars.JavaScriptCompiler.prototype;
 var Compiler = module.exports = function () {};
 Compiler.prototype = Handlebars.createFrame(JSCompiler);
 Compiler.prototype.compiler    = Compiler;
-Compiler.prototype.attrComiler = require('./attribute-compiler');
+Compiler.prototype.attrCompiler = require('./attributes');
 
 Compiler.prototype.compile = function (environment) {
   this.elementSlot = 0;
@@ -188,7 +195,7 @@ Compiler.prototype.compileChildren = function(environment, options) {
     compiler = this.compiler;
 
     if (child.attribute) {
-      compiler = this.attrComiler;
+      compiler = this.attrCompiler;
     }
 
     if (index == null) {
@@ -237,10 +244,9 @@ Compiler.prototype.append = function () {
   this.flushInline();
   var local = this.popStack();
 
-  this.context.aliases.domify    = 'this.domifyExpression';
-  this.context.aliases.isElement = 'this.isElement';
+  this.context.aliases.domify = 'this.domifyExpression';
 
-  this.source.push('if (' + local + '|| ' + local + ' === 0) {');
+  this.source.push('if (' + local + ' || ' + local + ' === 0) {');
   this.source.push('  ' + this.appendToBuffer('domify(' + local + ')'));
   this.source.push('}');
 
@@ -258,11 +264,14 @@ Compiler.prototype.appendComment = function () {
   this.source.push(this.appendToBuffer(this.initializeBuffer()));
 };
 
+Compiler.prototype.appendProgram = function () {
+  this.source.push(this.appendToBuffer(this.popStack() + '(depth0)'));
+};
+
 Compiler.prototype.appendEscaped = function () {
   var local = this.popStack();
 
-  this.context.aliases.textify   = 'this.textifyExpression';
-  this.context.aliases.isElement = 'this.isElement';
+  this.context.aliases.textify = 'this.textifyExpression';
 
   this.source.push(this.appendToBuffer('textify(' + local + ')'));
 };
@@ -282,7 +291,9 @@ Compiler.prototype.invokeElement = function () {
   var current = this.popStack();
 
   this.useRegister(element);
-  this.source.push(element + ' = document.createElement(' + current + '(depth0))');
+  this.source.push(
+    element + ' = document.createElement(' + current + '(depth0));'
+  );
 
   this.push(element);
 };
@@ -298,10 +309,10 @@ Compiler.prototype.invokeAttribute = function () {
 
 Compiler.prototype.invokeContent = function () {
   var element = this.topElement();
-  this.source.push(element + '.appendChild(' + this.popStack() + '(depth0))');
+  this.source.push(element + '.appendChild(' + this.popStack() + '(depth0));');
 };
 
-},{"./attribute-compiler":4,"handlebars":19}],8:[function(require,module,exports){
+},{"./attributes":5,"handlebars":19}],8:[function(require,module,exports){
 var ast     = require('./ast');
 var base    = require('./base');
 var printer = require('./printer');
@@ -316,38 +327,92 @@ exports.attach = function (DOMBars) {
   return DOMBars;
 };
 
-},{"./ast":3,"./base":5,"./printer":10,"./visitor":11}],9:[function(require,module,exports){
+},{"./ast":3,"./base":4,"./printer":10,"./visitor":11}],9:[function(require,module,exports){
 var HbsParser  = require('handlebars/lib/handlebars/compiler/parser');
 var HTMLParser = require('htmlparser2/lib/Parser');
 
-var Parser = function () { this.yy = {}; };
+/**
+ * Stringify an `AST.ProgramNode` so it can be run through others parsers. This
+ * is required for the node to be parsed as HTML *after* it is parsed as a
+ * Handlebars template. Handlebars must always run before the HTML parser, so
+ * it can correctly match block nodes (I couldn't see a simple way to resume
+ * the end block node parsing).
+ *
+ * @param  {Handlebars.AST.ProgramNode} program
+ * @return {String}
+ */
+var stringifyProgram = function (program) {
+  var html       = '';
+  var statements = program.statements;
 
+  for (var i = 0; i < statements.length; i++) {
+    var statement = statements[i];
+
+    if (statement.type === 'content') {
+      html += statement.string;
+    } else {
+      html += '{{' + i + '}}'; // "Alias" node
+    }
+  }
+
+  return html;
+};
+
+/**
+ * The parser is a simple constructor. All the functionality is on the prototype
+ * object.
+ */
+var Parser = function () {
+  this.yy = {};
+};
+
+/**
+ * Alias the parser constructor function.
+ *
+ * @type {Function}
+ */
 Parser.prototype.Parser = Parser;
 
+/**
+ * The primary functionality of the parser. Pushes the input text through
+ * Handlebars and a HTML parser, generating a AST for use with the compiler.
+ *
+ * @param  {String} input
+ * @return {Object}
+ */
 Parser.prototype.parse = function (input) {
   HbsParser.yy = this.yy;
 
-  var that = this;
-  var yy   = this.yy;
-  // Keep track of the current program and the current stack of program nodes
-  var program, element, stack;
+  var that  = this;
+  var yy    = this.yy;
 
-  // Create and return a new basic program node
-  var newProgram = function () { return new yy.ProgramNode([]); };
+  // Parse it as a Handlebars to extract the important nodes first. Then we
+  // stringify the node to something the HTML parser can handle. The AST the
+  // HTML parser generates will be parsed using Handlebars again to inject the
+  // original nodes back.
+  var hbsProgram = HbsParser.parse(input);
+  var html       = stringifyProgram(hbsProgram);
 
-  // Start the stack with a program node which will contain the entire parsed
-  // content
-  program = newProgram();
-  stack   = [ program ];
+  // Create and return a new empty program node.
+  var newProgram = function () {
+    return new yy.ProgramNode([]);
+  };
 
+  // Start the stack with an empty program node which will contain all the
+  // parsed elements.
+  var program = newProgram();
+  var stack   = [program];
+  var element;
+
+  // Generate a new HTML parser instance.
   var parser = new HTMLParser({
     onopentagname: function (name) {
-      var node = new yy.DOMElementNode(HbsParser.parse(name), [], newProgram());
+      var node = new yy.DOM.Element(name, [], newProgram());
       program.statements.push(node);
 
+      // Alias the currently active program node and element.
       element = node;
-      program = node.content;
-      stack.push(node.content);
+      stack.push(program = node.content);
     },
     onclosetag: function (name) {
       stack.pop();
@@ -355,30 +420,56 @@ Parser.prototype.parse = function (input) {
       program = stack[stack.length - 1];
     },
     onattribute: function (name, value) {
-      element.attributes.push(
-        new yy.DOMAttributeNode(HbsParser.parse(name), HbsParser.parse(value))
-      );
+      element.attributes.push(new yy.DOM.Attribute(name, value));
     },
     ontext: function (text) {
-      var statements = program.statements;
-      statements.push.apply(statements, HbsParser.parse(text).statements);
+      program.statements.push(new yy.DOM.Text(text));
     },
     onprocessinginstruction: function () {
-      throw new Error('Processing instructions are not supported in html');
+      throw new Error('Processing instructions are not supported in HTML');
     },
     oncomment: function (data) {
-      program.statements.push(new yy.DOMCommentNode(HbsParser.parse(data)));
+      program.statements.push(new yy.DOM.Comment(data));
     },
     onerror: function (error) {
-      console.log('error', error);
+      throw error;
     }
   });
+
   parser.write(input);
   parser.end();
 
-  return stack.pop();
+  var ast = stack[stack.length - 1];
+
+  (function recurse (program) {
+    for (var i = 0; i < program.statements.length; i++) {
+      var statement = program.statements[i];
+
+      if (statement.type === 'DOM_TEXT' || statement.type === 'DOM_COMMENT') {
+        statement.text = HbsParser.parse(statement.text);
+      } else if (statement.type === 'DOM_ELEMENT') {
+        statement.name = HbsParser.parse(statement.name);
+
+        for (var k = 0; k < statement.attributes.length; k++) {
+          var attribute = statement.attributes[k];
+
+          attribute.name  = HbsParser.parse(attribute.name);
+          attribute.value = HbsParser.parse(attribute.value);
+        }
+
+        recurse(statement.content);
+      }
+    }
+  })(ast);
+
+  return ast;
 };
 
+/**
+ * Export a static instance of the parser.
+ *
+ * @type {Parser}
+ */
 module.exports = new Parser();
 
 },{"handlebars/lib/handlebars/compiler/parser":25,"htmlparser2/lib/Parser":30}],10:[function(require,module,exports){

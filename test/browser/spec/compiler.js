@@ -288,6 +288,14 @@ describe('Compiler', function () {
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('text');
         });
+
+        it('should compile block helpers with DOM nodes', function () {
+          var template = DOMBars.compile('{{#test}}<div></div>{{/test}}')({
+            test: true
+          });
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div></div>');
+        });
       });
     });
   });
