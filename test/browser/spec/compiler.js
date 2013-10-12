@@ -280,6 +280,105 @@ describe('Compiler', function () {
         });
       });
 
+      describe('Helpers', function () {
+        describe('Built-in Helpers', function () {
+          it('should work with the each helper', function () {
+            var template = DOMBars.compile(
+              '<ul>{{#each test}}<li>{{.}}</li>{{/each}}</ul>'
+            )({
+              test: ['this', 'that', 'another thing']
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<ul><li>this</li><li>that</li><li>another thing</li></ul>'
+            );
+          });
+
+          it('should work with the if helper', function () {
+            var template = DOMBars.compile(
+              '{{#if test}}<div></div>{{else}}<span></span>{{/if}}'
+            )({
+              test: true
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div></div>');
+          });
+
+          it('should work with the unless helper', function () {
+            var template = DOMBars.compile(
+              '{{#unless test}}<div></div>{{else}}<span></span>{{/unless}}'
+            )({
+              test: false
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div></div>');
+          });
+
+          it('should work with the with helper', function () {
+            var template = DOMBars.compile(
+              '{{#with test.nested}}<span>I know {{value}}</span>{{/with}}'
+            )({
+              test: {
+                nested: {
+                  value: 'something goes here'
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<span>I know something goes here</span>'
+            );
+          });
+        });
+
+        describe('User-defined Helpers', function () {
+          it('should work with user-defined helpers that returns strings', function () {
+            var template = DOMBars.compile('{{test}}')({}, {
+              helpers: {
+                test: function (options) {
+                  return '<div></div>'
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('&lt;div&gt;&lt;/div&gt;');
+          });
+
+          it('should work with user-defined helpers that return safe strings', function () {
+            var template = DOMBars.compile('{{test}}')({}, {
+              helpers: {
+                test: function (options) {
+                  return new DOMBars.SafeString('<div></div>');
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div></div>');
+          });
+
+          it('should work with user-defined block helpers', function () {
+            var template = DOMBars.compile('{{#test}}content{{/test}}')({}, {
+              helpers: {
+                test: function (options) {
+                  var el = document.createElement('span');
+                  el.appendChild(options.fn());
+                  return el;
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<span>content</span>');
+          });
+        });
+      });
+
       describe('Block Expressions', function () {
         it('should compile block helpers', function () {
           var template = DOMBars.compile('{{#test}}text{{/test}}')({
