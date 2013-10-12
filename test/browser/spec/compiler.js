@@ -296,6 +296,32 @@ describe('Compiler', function () {
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div></div>');
         });
+
+        it('should compile deeply nested block helpers', function () {
+          var template = DOMBars.compile(
+            '<div>{{#test}}<span>{{#again}}{{more}}{{/again}}</span>{{/test}}</div>'
+          )({
+            test: {
+              again: {
+                more: 'test'
+              }
+            }
+          });
+
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal(
+            '<div><span>test</span></div>'
+          );
+        });
+
+        it('should work with else block helpers', function () {
+          var template = DOMBars.compile(
+            '{{#test}}<div></div>{{else}}<span></span>{{/test}}'
+          )({ test: false });
+
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<span></span>');
+        });
       });
     });
   });
