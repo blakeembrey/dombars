@@ -266,6 +266,19 @@ describe('Compiler', function () {
         });
       });
 
+      describe('Data Expressions', function () {
+        it('should compile data expressions', function () {
+          var template = DOMBars.compile('<div>{{@test}}</div>')({}, {
+            data: {
+              test: 'some data'
+            }
+          });
+
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal('<div>some data</div>');
+        });
+      });
+
       describe('Comment Expression', function () {
         it('should not output comment nodes in the template', function () {
           var template = DOMBars.compile('<div>{{! comment }}</div>')();
@@ -284,14 +297,14 @@ describe('Compiler', function () {
         describe('Built-in Helpers', function () {
           it('should work with the each helper', function () {
             var template = DOMBars.compile(
-              '<ul>{{#each test}}<li>{{.}}</li>{{/each}}</ul>'
+              '<ul>{{#each test}}<li>{{@index}} {{.}}</li>{{/each}}</ul>'
             )({
               test: ['this', 'that', 'another thing']
             });
 
             fixture.appendChild(template);
             expect(fixture.innerHTML).to.equal(
-              '<ul><li>this</li><li>that</li><li>another thing</li></ul>'
+              '<ul><li>0 this</li><li>1 that</li><li>2 another thing</li></ul>'
             );
           });
 
@@ -420,6 +433,80 @@ describe('Compiler', function () {
 
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<span></span>');
+        });
+      });
+
+      describe('Data Binding', function () {
+        describe('Expressions', function () {
+          var clock;
+
+          beforeEach(function () {
+            var i = 0;
+
+            // Custom subscription method.
+            DOMBars.subscribe = function (object, property, fn) {
+              setTimeout(function () {
+                i++; // Increment the subscription counter.
+                fn();
+              }, 100);
+            };
+
+            // Custom getter method.
+            DOMBars.get = function (object, property) {
+              return i ? 'after' : 'before';
+            };
+
+            clock = sinon.useFakeTimers();
+          });
+
+          afterEach(function () {
+            clock.restore();
+            DOMBars.subscribe = function () {};
+          });
+
+          it('should re-render a single expression', function () {
+            var template = DOMBars.compile('{{test}}')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('before');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('after');
+          });
+
+          it('should re-render expression beside text', function () {
+            var template = DOMBars.compile('go {{test}}')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('go before');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('go after');
+          });
+
+          it('should re-render multiple expressions', function () {
+            var template = DOMBars.compile('{{test}} {{test}}')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('before before');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('after after');
+          });
+
+          it('should working inside an element', function () {
+            var template = DOMBars.compile('<div>{{test}}</div>')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div>before</div>');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('<div>after</div>');
+          });
         });
       });
     });
