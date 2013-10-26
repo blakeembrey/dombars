@@ -1,4 +1,4 @@
-/* global describe, it */
+/* global describe, it, expect, beforeEach, afterEach, DOMBars, sinon */
 
 describe('Compiler', function () {
   var fixture = document.getElementById('fixture');
@@ -56,7 +56,7 @@ describe('Compiler', function () {
       it('should compile expressions before and after text', function () {
         var template = DOMBars.compile('{{before}} another {{after}}')({
           before: 'yet',
-          after: 'test'
+          after:  'test'
         });
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('yet another test');
@@ -140,29 +140,35 @@ describe('Compiler', function () {
           );
         });
 
-        it('should compile expressions and text in the attribute value', function () {
-          var template = DOMBars.compile(
-            '<div class="some {{test}} here"></div>'
-          )({
-            test: 'class'
-          });
-          fixture.appendChild(template);
-          expect(fixture.innerHTML).to.equal(
-            '<div class="some class here"></div>'
-          );
-        });
+        it(
+          'should compile expressions and text in the attribute value',
+          function () {
+            var template = DOMBars.compile(
+              '<div class="some {{test}} here"></div>'
+            )({
+              test: 'class'
+            });
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<div class="some class here"></div>'
+            );
+          }
+        );
 
-        it('should compile expressions and text in the attribute name', function () {
-          var template = DOMBars.compile(
-            '<div some-{{test}}-here="test"></div>'
-          )({
-            test: 'attribute'
-          });
-          fixture.appendChild(template);
-          expect(fixture.innerHTML).to.equal(
-            '<div some-attribute-here="test"></div>'
-          );
-        });
+        it(
+          'should compile expressions and text in the attribute name',
+          function () {
+            var template = DOMBars.compile(
+              '<div some-{{test}}-here="test"></div>'
+            )({
+              test: 'attribute'
+            });
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<div some-attribute-here="test"></div>'
+            );
+          }
+        );
       });
 
       describe('Children', function () {
@@ -349,31 +355,37 @@ describe('Compiler', function () {
         });
 
         describe('User-defined Helpers', function () {
-          it('should work with user-defined helpers that returns strings', function () {
-            var template = DOMBars.compile('{{test}}')({}, {
-              helpers: {
-                test: function (options) {
-                  return '<div></div>'
+          it(
+            'should work with user-defined helpers that returns strings',
+            function () {
+              var template = DOMBars.compile('{{test}}')({}, {
+                helpers: {
+                  test: function () {
+                    return '<div></div>';
+                  }
                 }
-              }
-            });
+              });
 
-            fixture.appendChild(template);
-            expect(fixture.innerHTML).to.equal('&lt;div&gt;&lt;/div&gt;');
-          });
+              fixture.appendChild(template);
+              expect(fixture.innerHTML).to.equal('&lt;div&gt;&lt;/div&gt;');
+            }
+          );
 
-          it('should work with user-defined helpers that return safe strings', function () {
-            var template = DOMBars.compile('{{test}}')({}, {
-              helpers: {
-                test: function (options) {
-                  return new DOMBars.SafeString('<div></div>');
+          it(
+            'should work with user-defined helpers that return safe strings',
+            function () {
+              var template = DOMBars.compile('{{test}}')({}, {
+                helpers: {
+                  test: function () {
+                    return new DOMBars.SafeString('<div></div>');
+                  }
                 }
-              }
-            });
+              });
 
-            fixture.appendChild(template);
-            expect(fixture.innerHTML).to.equal('<div></div>');
-          });
+              fixture.appendChild(template);
+              expect(fixture.innerHTML).to.equal('<div></div>');
+            }
+          );
 
           it('should work with user-defined block helpers', function () {
             var template = DOMBars.compile('{{#test}}content{{/test}}')({}, {
@@ -411,7 +423,9 @@ describe('Compiler', function () {
 
         it('should compile deeply nested block helpers', function () {
           var template = DOMBars.compile(
-            '<div>{{#test}}<span>{{#again}}{{more}}{{/again}}</span>{{/test}}</div>'
+            '<div>{{#test}}' +
+              '<span>{{#again}}{{more}}{{/again}}</span>' +
+            '{{/test}}</div>'
           )({
             test: {
               again: {
@@ -452,7 +466,7 @@ describe('Compiler', function () {
             };
 
             // Custom getter method.
-            DOMBars.get = function (object, property) {
+            DOMBars.get = function () {
               return i ? 'after' : 'before';
             };
 

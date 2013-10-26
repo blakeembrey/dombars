@@ -16,10 +16,10 @@
   <script>
     mocha.setup('bdd');
     mocha.reporter('html');
-    expect = chai.expect;
+    window.expect = chai.expect;
   </script>
 
-  <script src="../../dombars.bundle.js"></script>
+  <script src="../../dist/dombars.js"></script>
 
   <script src="spec/compiler.js"></script>
 
