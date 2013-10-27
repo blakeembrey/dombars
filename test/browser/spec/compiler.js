@@ -303,14 +303,16 @@ describe('Compiler', function () {
         describe('Built-in Helpers', function () {
           it('should work with the each helper', function () {
             var template = DOMBars.compile(
-              '<ul>{{#each test}}<li>{{@index}} {{.}}</li>{{/each}}</ul>'
+              '<ul>{{#each test}}<li>{{@index}} = {{.}}</li>{{/each}}</ul>'
             )({
               test: ['this', 'that', 'another thing']
             });
 
             fixture.appendChild(template);
             expect(fixture.innerHTML).to.equal(
-              '<ul><li>0 this</li><li>1 that</li><li>2 another thing</li></ul>'
+              '<ul>' +
+                '<li>0 = this</li><li>1 = that</li><li>2 = another thing</li>' +
+              '</ul>'
             );
           });
 
@@ -520,6 +522,17 @@ describe('Compiler', function () {
             clock.tick(100);
 
             expect(fixture.innerHTML).to.equal('<div>after</div>');
+          });
+
+          it('should update attribute values', function () {
+            var template = DOMBars.compile('<div class="{{test}}"></div>')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div class="before"></div>');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('<div class="after"></div>');
           });
         });
       });
