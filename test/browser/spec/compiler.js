@@ -534,6 +534,82 @@ describe('Compiler', function () {
 
             expect(fixture.innerHTML).to.equal('<div class="after"></div>');
           });
+
+          it('should update attribute values with text', function () {
+            var template = DOMBars.compile(
+              '<div class="test {{test}}"></div>'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<div class="test before"></div>'
+            );
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal(
+              '<div class="test after"></div>'
+            );
+          });
+
+          it('should update attribute names', function () {
+            var template = DOMBars.compile('<div {{test}}="attr"></div>')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div before="attr"></div>');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('<div after="attr"></div>');
+          });
+
+          it('should update attribute names with text', function () {
+            var template = DOMBars.compile(
+              '<div some-{{test}}="attr"></div>'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<div some-before="attr"></div>'
+            );
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal(
+              '<div some-after="attr"></div>'
+            );
+          });
+
+          it('should update tag names', function () {
+            var template = DOMBars.compile(
+              '<{{test}} some="attr"></{{test}}>'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<before some="attr"></before>');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('<after some="attr"></after>');
+          });
+
+
+          it('should update tag names with text', function () {
+            var template = DOMBars.compile(
+              '<tag-{{test}} some="attr"></tag-{{test}}>'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<tag-before some="attr"></tag-before>'
+            );
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal(
+              '<tag-after some="attr"></tag-after>'
+            );
+          });
         });
       });
     });
