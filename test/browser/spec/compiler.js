@@ -513,7 +513,7 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('after after');
           });
 
-          it('should working inside an element', function () {
+          it('should re-render inside an element', function () {
             var template = DOMBars.compile('<div>{{test}}</div>')();
 
             fixture.appendChild(template);
@@ -593,7 +593,6 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('<after some="attr"></after>');
           });
 
-
           it('should update tag names with text', function () {
             var template = DOMBars.compile(
               '<tag-{{test}} some="attr"></tag-{{test}}>'
@@ -608,6 +607,29 @@ describe('Compiler', function () {
 
             expect(fixture.innerHTML).to.equal(
               '<tag-after some="attr"></tag-after>'
+            );
+          });
+
+          it('should be able to update everything together', function () {
+            var template = DOMBars.compile(
+              '<tag-{{test}} attr-{{test}}="content {{test}}" ' +
+              'another-{{test}}="more {{test}}">{{test}} text {{test}}' +
+              '</tag-{{test}}>'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<tag-before attr-before="content before" ' +
+              'another-before="more before">before text before' +
+              '</tag-before>'
+            );
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal(
+              '<tag-after attr-after="content after" ' +
+              'another-after="more after">after text after' +
+              '</tag-after>'
             );
           });
         });
