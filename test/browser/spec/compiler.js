@@ -480,7 +480,7 @@ describe('Compiler', function () {
             DOMBars.subscribe = function () {};
           });
 
-          it('should re-render a single expression', function () {
+          it('should update a single expression', function () {
             var template = DOMBars.compile('{{test}}')();
 
             fixture.appendChild(template);
@@ -491,7 +491,7 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('after');
           });
 
-          it('should re-render expression beside text', function () {
+          it('should update expression beside text', function () {
             var template = DOMBars.compile('go {{test}}')();
 
             fixture.appendChild(template);
@@ -502,7 +502,7 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('go after');
           });
 
-          it('should re-render multiple expressions', function () {
+          it('should update multiple expressions', function () {
             var template = DOMBars.compile('{{test}} {{test}}')();
 
             fixture.appendChild(template);
@@ -513,7 +513,7 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('after after');
           });
 
-          it('should re-render inside an element', function () {
+          it('should update inside an element', function () {
             var template = DOMBars.compile('<div>{{test}}</div>')();
 
             fixture.appendChild(template);
@@ -608,6 +608,25 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal(
               '<tag-after some="attr"></tag-after>'
             );
+          });
+
+          it('should update simple helpers', function () {
+            var template = DOMBars.compile(
+              '{{helper test}}'
+            )({}, {
+              helpers: {
+                helper: function (test) {
+                  return 'helper ' + test;
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('helper before');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('helper after');
           });
 
           it('should be able to update everything together', function () {
