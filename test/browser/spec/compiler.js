@@ -524,6 +524,17 @@ describe('Compiler', function () {
             expect(fixture.innerHTML).to.equal('<div>after</div>');
           });
 
+          it('should update un-escaped expressions', function () {
+            var template = DOMBars.compile('<div>{{{test}}}</div>')();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<div>before</div>');
+
+            clock.tick(100);
+
+            expect(fixture.innerHTML).to.equal('<div>after</div>');
+          });
+
           it('should update attribute values', function () {
             var template = DOMBars.compile('<div class="{{test}}"></div>')();
 
