@@ -35,6 +35,7 @@
   "dependencies": {
     "htmlparser2": "~3.1.6",
     "handlebars": "~1.0.12",
-    "domify": "~1.0.0"
+    "domify": "~1.0.0",
+    "raf-component": "~1.1.1"
   }
 }

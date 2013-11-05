@@ -169,6 +169,22 @@ describe('Compiler', function () {
             );
           }
         );
+
+        it(
+          'should not reuse attribute and non-attribute programs',
+          function () {
+            var template = DOMBars.compile(
+              '<h1>{{title}}</h1><input value="{{title}}">'
+            )({
+              title: 'Test'
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal(
+              '<h1>Test</h1><input value="Test">'
+            );
+          }
+        );
       });
 
       describe('Children', function () {
@@ -480,7 +496,7 @@ describe('Compiler', function () {
             DOMBars.subscribe = function () {};
           });
 
-          it('should update a single expression', function () {
+          it('should update a single expression', function (done) {
             var template = DOMBars.compile('{{test}}')();
 
             fixture.appendChild(template);
@@ -488,10 +504,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('after');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('after');
+              return done();
+            });
           });
 
-          it('should update expression beside text', function () {
+          it('should update expression beside text', function (done) {
             var template = DOMBars.compile('go {{test}}')();
 
             fixture.appendChild(template);
@@ -499,10 +518,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('go after');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('go after');
+              return done();
+            });
           });
 
-          it('should update multiple expressions', function () {
+          it('should update multiple expressions', function (done) {
             var template = DOMBars.compile('{{test}} {{test}}')();
 
             fixture.appendChild(template);
@@ -510,10 +532,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('after after');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('after after');
+              return done();
+            });
           });
 
-          it('should update inside an element', function () {
+          it('should update inside an element', function (done) {
             var template = DOMBars.compile('<div>{{test}}</div>')();
 
             fixture.appendChild(template);
@@ -521,10 +546,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('<div>after</div>');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<div>after</div>');
+              return done();
+            });
           });
 
-          it('should update un-escaped expressions', function () {
+          it('should update un-escaped expressions', function (done) {
             var template = DOMBars.compile('<div>{{{test}}}</div>')();
 
             fixture.appendChild(template);
@@ -532,10 +560,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('<div>after</div>');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<div>after</div>');
+              return done();
+            });
           });
 
-          it('should update attribute values', function () {
+          it('should update attribute values', function (done) {
             var template = DOMBars.compile('<div class="{{test}}"></div>')();
 
             fixture.appendChild(template);
@@ -543,10 +574,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('<div class="after"></div>');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<div class="after"></div>');
+              return done();
+            });
           });
 
-          it('should update attribute values with text', function () {
+          it('should update attribute values with text', function (done) {
             var template = DOMBars.compile(
               '<div class="test {{test}}"></div>'
             )();
@@ -558,12 +592,15 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal(
-              '<div class="test after"></div>'
-            );
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal(
+                '<div class="test after"></div>'
+              );
+              return done();
+            });
           });
 
-          it('should update attribute names', function () {
+          it('should update attribute names', function (done) {
             var template = DOMBars.compile('<div {{test}}="attr"></div>')();
 
             fixture.appendChild(template);
@@ -571,10 +608,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('<div after="attr"></div>');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<div after="attr"></div>');
+              return done();
+            });
           });
 
-          it('should update attribute names with text', function () {
+          it('should update attribute names with text', function (done) {
             var template = DOMBars.compile(
               '<div some-{{test}}="attr"></div>'
             )();
@@ -586,12 +626,15 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal(
-              '<div some-after="attr"></div>'
-            );
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal(
+                '<div some-after="attr"></div>'
+              );
+              return done();
+            });
           });
 
-          it('should update tag names', function () {
+          it('should update tag names', function (done) {
             var template = DOMBars.compile(
               '<{{test}} some="attr"></{{test}}>'
             )();
@@ -601,10 +644,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('<after some="attr"></after>');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<after some="attr"></after>');
+              return done();
+            });
           });
 
-          it('should update tag names with text', function () {
+          it('should update tag names with text', function (done) {
             var template = DOMBars.compile(
               '<tag-{{test}} some="attr"></tag-{{test}}>'
             )();
@@ -616,12 +662,15 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal(
-              '<tag-after some="attr"></tag-after>'
-            );
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal(
+                '<tag-after some="attr"></tag-after>'
+              );
+              return done();
+            });
           });
 
-          it('should update simple helpers', function () {
+          it('should update simple helpers', function (done) {
             var template = DOMBars.compile(
               '{{helper test}}'
             )({}, {
@@ -637,10 +686,13 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal('helper after');
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('helper after');
+              return done();
+            });
           });
 
-          it('should be able to update everything together', function () {
+          it('should be able to update everything together', function (done) {
             var template = DOMBars.compile(
               '<tag-{{test}} attr-{{test}}="content {{test}}" ' +
               'another-{{test}}="more {{test}}">{{test}} text {{test}}' +
@@ -656,11 +708,14 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            expect(fixture.innerHTML).to.equal(
-              '<tag-after attr-after="content after" ' +
-              'another-after="more after">after text after' +
-              '</tag-after>'
-            );
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal(
+                '<tag-after attr-after="content after" ' +
+                'another-after="more after">after text after' +
+                '</tag-after>'
+              );
+              return done();
+            });
           });
         });
       });
