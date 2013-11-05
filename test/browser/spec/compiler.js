@@ -29,6 +29,32 @@ describe('Compiler', function () {
       expect(fixture.innerHTML).to.equal('testing');
     });
 
+    it('should be able to compile simple paths', function () {
+      var template = DOMBars.compile('{{test.nested.path}}')({
+        test: {
+          nested: {
+            path: 'testing'
+          }
+        }
+      });
+
+      fixture.appendChild(template);
+      expect(fixture.innerHTML).to.equal('testing');
+    });
+
+    it('should be able to compile using segment-literal notation', function () {
+      var template = DOMBars.compile('{{test.[#nested].[~path]}}')({
+        test: {
+          '#nested': {
+            '~path': 'testing'
+          }
+        }
+      });
+
+      fixture.appendChild(template);
+      expect(fixture.innerHTML).to.equal('testing');
+    });
+
     describe('Text and Expressions', function () {
       it('should compile text before expressions', function () {
         var template = DOMBars.compile('test {{test}}')({
