@@ -185,6 +185,19 @@ describe('Compiler', function () {
             );
           }
         );
+
+        it('should not incorrectly reuse DOM nodes', function () {
+          var template = DOMBars.compile(
+            '<div>{{test}}</div><span>{{test}}</span>'
+          )({
+            test: 'text'
+          });
+
+          fixture.appendChild(template);
+          expect(fixture.innerHTML).to.equal(
+            '<div>text</div><span>text</span>'
+          );
+        });
       });
 
       describe('Children', function () {
