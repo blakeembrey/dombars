@@ -71,6 +71,24 @@ module.exports = function (grunt) {
     },
 
     /**
+     * Uglify the output of the minified Browserified files.
+     *
+     * @type {Object}
+     */
+    uglify: {
+      minify: {
+        files: {
+          'dist/dombars.min.js': ['dist/dombars.min.js']
+        }
+      },
+      'minify-runtime': {
+        files: {
+          'dist/dombars.runtime.min.js': ['dist/dombars.runtime.min.js']
+        }
+      }
+    },
+
+    /**
      * Watch for any file changes and run the supporting processes.
      *
      * @type {Object}
@@ -78,7 +96,7 @@ module.exports = function (grunt) {
     watch: {
       build: {
         files: ['lib/**/*.js'],
-        tasks: ['browserify']
+        tasks: ['compile']
       },
       lint: {
         files: ['<%= jshint.all.src %>'],
@@ -87,9 +105,8 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('test', ['jshint']);
-
-  grunt.registerTask('build', ['test', 'browserify']);
-
+  grunt.registerTask('test',    ['jshint']);
+  grunt.registerTask('compile', ['browserify', 'uglify']);
+  grunt.registerTask('build',   ['test', 'compile']);
   grunt.registerTask('default', ['build', 'watch']);
 };

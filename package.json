@@ -4,8 +4,8 @@
   "description": "An extension of Handlebars that generates DOM objects instead of strings.",
   "main": "./lib/dombars.js",
   "scripts": {
-    "build": "browserify ./lib/dombars.js -s DOMBars -o dombars.bundle.js",
-    "test": "npm run-script build && ./node_modules/.bin/mocha-phantomjs ./test/index.html"
+    "build": "./node_modules/.bin/grunt build",
+    "test": "npm run-script build && ./node_modules/.bin/mocha-phantomjs ./test/browser/index.html"
   },
   "repository": "https://github.com/blakeembrey/dombars",
   "keywords": [
@@ -30,7 +30,8 @@
     "load-grunt-tasks": "~0.2.0",
     "grunt-newer": "~0.5.4",
     "sinon-chai": "~2.4.0",
-    "sinon": "~1.7.3"
+    "sinon": "~1.7.3",
+    "grunt-contrib-uglify": "~0.2.5"
   },
   "dependencies": {
     "htmlparser2": "~3.1.6",
