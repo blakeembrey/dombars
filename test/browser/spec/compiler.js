@@ -514,6 +514,8 @@ describe('Compiler', function () {
 
       describe('Data Binding', function () {
         describe('Expressions', function () {
+          var oldGet       = DOMBars.get;
+          var oldSubscribe = DOMBars.subscribe;
           var clock;
 
           beforeEach(function () {
@@ -537,7 +539,8 @@ describe('Compiler', function () {
 
           afterEach(function () {
             clock.restore();
-            DOMBars.subscribe = function () {};
+            DOMBars.get       = oldGet;
+            DOMBars.subscribe = oldSubscribe;
           });
 
           it('should update a single expression', function (done) {
