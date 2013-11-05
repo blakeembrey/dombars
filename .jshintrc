@@ -1,5 +1,4 @@
 {
-  "indent":   2,        // Specify indentation spacing.
   "maxerr":   100,      // Maximum errors before stopping.
   "maxlen":   80,       // Maximum line length.
   "quotmark": "single", // Consistent quotation mark usage.
