@@ -1,3 +1,29 @@
+/**
+ * Standard options for working with a Browserify compiled script.
+ *
+ * @type {Object}
+ */
+var debugOptions = {
+  debug:      true,
+  transform:  [],
+  standalone: 'DOMBars'
+};
+
+/**
+ * Standard options for a miinified Browserify script.
+ *
+ * @type {Object}
+ */
+var minifyOptions = {
+  transform:  ['uglifyify'],
+  standalone: 'DOMBars'
+};
+
+/**
+ * Initialize the grunt configuration script.
+ *
+ * @param {Object} grunt
+ */
 module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
 
@@ -25,19 +51,22 @@ module.exports = function (grunt) {
       debug: {
         src:  'lib/dombars.js',
         dest: 'dist/dombars.js',
-        options: {
-          debug:      true,
-          transform:  [],
-          standalone: 'DOMBars'
-        }
+        options: debugOptions
       },
       minify: {
         src:  'lib/dombars.js',
         dest: 'dist/dombars.min.js',
-        options: {
-          transform:  ['uglifyify'],
-          standalone: 'DOMBars'
-        }
+        options: minifyOptions
+      },
+      'debug-runtime': {
+        src: 'lib/dombars.runtime.js',
+        dest: 'dist/dombars.runtime.js',
+        options: debugOptions
+      },
+      'minify-runtime': {
+        src:  'lib/dombars.runtime.js',
+        dest: 'dist/dombars.runtime.min.js',
+        options: minifyOptions
       }
     },
 
