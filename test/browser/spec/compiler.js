@@ -24,6 +24,7 @@ describe('Compiler', function () {
       var template = DOMBars.compile('{{test}}')({
         test: 'testing'
       });
+
       fixture.appendChild(template);
       expect(fixture.innerHTML).to.equal('testing');
     });
@@ -33,6 +34,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('test {{test}}')({
           test: 'again'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('test again');
       });
@@ -41,6 +43,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('{{test}} test')({
           test: 'another'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('another test');
       });
@@ -49,6 +52,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('one {{test}} test')({
           test: 'more'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('one more test');
       });
@@ -58,6 +62,7 @@ describe('Compiler', function () {
           before: 'yet',
           after:  'test'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('yet another test');
       });
@@ -73,6 +78,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('<!-- {{test}} -->')({
           test: 'test'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('<!-- test -->');
       });
@@ -81,6 +87,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('<!-- test {{mixing}} content -->')({
           mixing: 'more'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('<!-- test more content -->');
       });
@@ -96,6 +103,7 @@ describe('Compiler', function () {
         var template = DOMBars.compile('<{{test}}></{{test}}>')({
           test: 'div'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('<div></div>');
       });
@@ -104,8 +112,35 @@ describe('Compiler', function () {
         var template = DOMBars.compile('<{{test}}-tag></{{test}}-tag>')({
           test: 'custom'
         });
+
         fixture.appendChild(template);
         expect(fixture.innerHTML).to.equal('<custom-tag></custom-tag>');
+      });
+
+      it('should not incorrectly reuse DOM nodes', function () {
+        var template = DOMBars.compile(
+          '<div>{{test}}</div><span>{{test}}</span>'
+        )({
+          test: 'text'
+        });
+
+        fixture.appendChild(template);
+        expect(fixture.innerHTML).to.equal(
+          '<div>text</div><span>text</span>'
+        );
+      });
+
+      it('should not reuse attribute and non-attribute programs', function () {
+        var template = DOMBars.compile(
+          '<h1>{{title}}</h1><input value="{{title}}">'
+        )({
+          title: 'Test'
+        });
+
+        fixture.appendChild(template);
+        expect(fixture.innerHTML).to.equal(
+          '<h1>Test</h1><input value="Test">'
+        );
       });
 
       describe('Attributes', function () {
@@ -118,6 +153,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div class="{{test}}"></div>')({
             test: 'value'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div class="value"></div>');
         });
@@ -126,6 +162,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div {{test}}="value"></div>')({
             test: 'attribute'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div attribute="value"></div>');
         });
@@ -134,6 +171,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile(
             '<div some="here" attribute="there"></div>'
           )();
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal(
             '<div some="here" attribute="there"></div>'
@@ -148,6 +186,7 @@ describe('Compiler', function () {
             )({
               test: 'class'
             });
+
             fixture.appendChild(template);
             expect(fixture.innerHTML).to.equal(
               '<div class="some class here"></div>'
@@ -163,6 +202,7 @@ describe('Compiler', function () {
             )({
               test: 'attribute'
             });
+
             fixture.appendChild(template);
             expect(fixture.innerHTML).to.equal(
               '<div some-attribute-here="test"></div>'
@@ -170,33 +210,15 @@ describe('Compiler', function () {
           }
         );
 
-        it(
-          'should not reuse attribute and non-attribute programs',
-          function () {
-            var template = DOMBars.compile(
-              '<h1>{{title}}</h1><input value="{{title}}">'
-            )({
-              title: 'Test'
-            });
-
-            fixture.appendChild(template);
-            expect(fixture.innerHTML).to.equal(
-              '<h1>Test</h1><input value="Test">'
-            );
-          }
-        );
-
-        it('should not incorrectly reuse DOM nodes', function () {
+        it('should interpret false as remove the attribute', function () {
           var template = DOMBars.compile(
-            '<div>{{test}}</div><span>{{test}}</span>'
+            '<input type="checkbox" checked="{{{test}}}">'
           )({
-            test: 'text'
+            test: false
           });
 
           fixture.appendChild(template);
-          expect(fixture.innerHTML).to.equal(
-            '<div>text</div><span>text</span>'
-          );
+          expect(fixture.innerHTML).to.equal('<input type="checkbox">');
         });
       });
 
@@ -210,6 +232,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{test}}</div>')({
             test: 'test content'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div>test content</div>');
         });
@@ -218,6 +241,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>some {{test}} here</div')({
             test: 'content'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div>some content here</div>');
         });
@@ -240,6 +264,7 @@ describe('Compiler', function () {
           )({
             test: 'expression'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal(
             '<div>test <div></div> expression</div>'
@@ -250,6 +275,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{{test}}}</div>')({
             test: '<div></div>'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
@@ -258,6 +284,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{{test}}}</div>')({
             test: 'text'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div>text</div>');
         });
@@ -266,6 +293,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{test}}</div>')({
             test: '<div></div>'
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal(
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
@@ -276,6 +304,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{test}}</div>')({
             test: document.createElement('div')
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal(
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
@@ -288,6 +317,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{test}}</div>')({
             test: new DOMBars.SafeString('<div></div>')
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
@@ -296,6 +326,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('<div>{{{test}}}</div>')({
             test: new DOMBars.SafeString('<div></div>')
           });
+
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
