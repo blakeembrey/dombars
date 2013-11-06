@@ -806,6 +806,22 @@ describe('Compiler', function () {
             });
           });
 
+          it('should update comment nodes', function (done) {
+            var template = DOMBars.compile(
+              '<!-- {{test}} -->'
+            )();
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('<!-- before -->');
+
+            clock.tick(100);
+
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('<!-- after -->');
+              return done();
+            });
+          });
+
           it('should be able to update everything together', function (done) {
             var template = DOMBars.compile(
               '<tag-{{test}} attr-{{test}}="content {{test}}" ' +
