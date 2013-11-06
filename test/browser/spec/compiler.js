@@ -442,6 +442,47 @@ describe('Compiler', function () {
           });
         });
 
+        describe('Expressions', function () {
+          it('should be able to refer to the parent scope', function () {
+            var template = DOMBars.compile([
+              '<h1>Comments</h1>',
+              '',
+              '<div id="comments">',
+              '{{#each comments}}',
+              '<h2><a href="/posts/{{../permalink}}#{{id}}">{{title}}</a></h2>',
+              '<div>{{body}}</div>',
+              '{{/each}}',
+              '</div>'
+            ].join('\n'))({
+              permalink: 'comments',
+              comments: [{
+                id: 1,
+                title: 'Test',
+                body: 'Example comment'
+              }, {
+                id: 3,
+                title: 'Again',
+                body: 'Another comment'
+              }]
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal([
+              '<h1>Comments</h1>',
+              '',
+              '<div id="comments">',
+              '',
+              '<h2><a href="/posts/comments#1">Test</a></h2>',
+              '<div>Example comment</div>',
+              '',
+              '<h2><a href="/posts/comments#3">Again</a></h2>',
+              '<div>Another comment</div>',
+              '',
+              '</div>'
+            ].join('\n'));
+          });
+        });
+
         describe('User-defined Helpers', function () {
           it(
             'should work with user-defined helpers that returns strings',
