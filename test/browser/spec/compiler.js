@@ -580,11 +580,21 @@ describe('Compiler', function () {
       });
 
       describe('Data Binding', function () {
-        describe('Expressions', function () {
-          var oldGet       = DOMBars.get;
-          var oldSubscribe = DOMBars.subscribe;
-          var clock;
+        var oldGet       = DOMBars.get;
+        var oldSubscribe = DOMBars.subscribe;
+        var clock;
 
+        beforeEach(function () {
+          clock = sinon.useFakeTimers();
+        });
+
+        afterEach(function () {
+          clock.restore();
+          DOMBars.get       = oldGet;
+          DOMBars.subscribe = oldSubscribe;
+        });
+
+        describe('Expressions', function () {
           beforeEach(function () {
             var i = 0;
 
@@ -600,14 +610,6 @@ describe('Compiler', function () {
             DOMBars.get = function () {
               return i ? 'after' : 'before';
             };
-
-            clock = sinon.useFakeTimers();
-          });
-
-          afterEach(function () {
-            clock.restore();
-            DOMBars.get       = oldGet;
-            DOMBars.subscribe = oldSubscribe;
           });
 
           it('should update a single expression', function (done) {
@@ -844,6 +846,35 @@ describe('Compiler', function () {
                 'another-after="more after">after text after' +
                 '</tag-after>'
               );
+              return done();
+            });
+          });
+        });
+
+        describe('Advanced Usage', function () {
+          it('should be able to update nested helpers', function (done) {
+            DOMBars.subscribe = function (obj, name, fn) {
+              if (name !== 'test') { return; }
+
+              obj.test = false;
+              setTimeout(fn, 100);
+            };
+
+            var template = DOMBars.compile(
+              '{{#test}}{{more}}{{/test}}'
+            )({
+              test: {
+                more: 'racecar'
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('racecar');
+
+            clock.tick(100);
+
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('');
               return done();
             });
           });
