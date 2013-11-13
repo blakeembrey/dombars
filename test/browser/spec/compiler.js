@@ -849,6 +849,30 @@ describe('Compiler', function () {
               return done();
             });
           });
+
+          it('should be able to update block helpers', function (done) {
+            var template = DOMBars.compile(
+              '{{#helper test}}{{value}}{{/helper}}'
+            )({}, {
+              helpers: {
+                helper: function (value, options) {
+                  return options.fn({
+                    value: value
+                  });
+                }
+              }
+            });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('before');
+
+            clock.tick(100);
+
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('after');
+              return done();
+            });
+          });
         });
 
         describe('Advanced Usage', function () {
