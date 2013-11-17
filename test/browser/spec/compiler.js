@@ -29,7 +29,7 @@ describe('Compiler', function () {
       expect(fixture.innerHTML).to.equal('testing');
     });
 
-    it('should be able to compile simple paths', function () {
+    it('should compile simple paths', function () {
       var template = DOMBars.compile('{{test.nested.path}}')({
         test: {
           nested: {
@@ -42,7 +42,7 @@ describe('Compiler', function () {
       expect(fixture.innerHTML).to.equal('testing');
     });
 
-    it('should be able to compile using segment-literal notation', function () {
+    it('should compile using segment-literal notation', function () {
       var template = DOMBars.compile('{{test.[#nested].[~path]}}')({
         test: {
           '#nested': {
@@ -443,7 +443,7 @@ describe('Compiler', function () {
         });
 
         describe('Expressions', function () {
-          it('should be able to refer to the parent scope', function () {
+          it('should refer to the parent scope', function () {
             var template = DOMBars.compile([
               '<h1>Comments</h1>',
               '',
@@ -824,7 +824,7 @@ describe('Compiler', function () {
             });
           });
 
-          it('should be able to update everything together', function (done) {
+          it('should update everything together', function (done) {
             var template = DOMBars.compile(
               '<tag-{{test}} attr-{{test}}="content {{test}}" ' +
               'another-{{test}}="more {{test}}">{{test}} text {{test}}' +
@@ -850,7 +850,7 @@ describe('Compiler', function () {
             });
           });
 
-          it('should be able to update block helpers', function (done) {
+          it('should update block helpers', function (done) {
             var template = DOMBars.compile(
               '{{#helper test}}{{value}}{{/helper}}'
             )({}, {
@@ -876,7 +876,7 @@ describe('Compiler', function () {
         });
 
         describe('Advanced Usage', function () {
-          it('should be able to update nested helpers', function (done) {
+          it('should update nested helpers', function (done) {
             DOMBars.subscribe = function (obj, name, fn) {
               if (name !== 'test') { return; }
 
@@ -899,6 +899,29 @@ describe('Compiler', function () {
 
             DOMBars.Utils.requestAnimationFrame(function () {
               expect(fixture.innerHTML).to.equal('');
+              return done();
+            });
+          });
+
+          it('should update conditional block helpers', function (done) {
+            DOMBars.subscribe = function (obj, name, fn) {
+              if (name !== 'test') { return; }
+
+              obj.test = false;
+              setTimeout(fn, 100);
+            };
+
+            var template = DOMBars.compile(
+              '{{#if test}}true{{else}}false{{/if}}'
+            )({ test: true });
+
+            fixture.appendChild(template);
+            expect(fixture.innerHTML).to.equal('true');
+
+            clock.tick(100);
+
+            DOMBars.Utils.requestAnimationFrame(function () {
+              expect(fixture.innerHTML).to.equal('false');
               return done();
             });
           });
