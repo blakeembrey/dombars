@@ -9,10 +9,12 @@
   },
   "repository": "https://github.com/blakeembrey/dombars",
   "keywords": [
+    "dombars",
+    "template",
     "dom",
+    "html",
     "handlebars",
-    "templates",
-    "html"
+    "mustache"
   ],
   "author": "Blake Embrey",
   "license": "MIT",
