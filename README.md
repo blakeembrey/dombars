@@ -1,22 +1,30 @@
-# DOMBars
+# dombars
 
-DOMBars is an extension of [Handlebars.js](https://github.com/wycats/handlebars.js). It keeps almost all the same semantics of Handlebars, but instead generates DOM objects instead of string-based templates. This is an extremely powerful concept when you consider data binding and reactive programming. By creating DOM representations of a template, we can easily keep track of all the generated template and update only the specific node when any data changes. All this without any random attributes having to be added to the HTML markup.
+DOMBars is an extension of [Handlebars.js](https://github.com/wycats/handlebars.js). It keeps almost all the same semantics of Handlebars, but generates DOM objects instead of string-based templates. This is an extremely powerful concept when you consider data binding and reactive programming. By creating DOM representations of a template, we can easily keep track of all the generated nodes and update only the specific content when data changes. All of this is possible without any special markup being added to your HTML and Handlebars templates.
 
 ## API
 
-The API is 100% compatible with Handlebars, but it adds some extended functionality. Semantically, there is zero change. However, some things to note is that helper functions will generate DOM objects (instead of strings) so you can't just concatinate strings and hope for the best. The approach here would be to append each function output to a document fragment.
+The API is backward-compatible with Handlebars, but extends it with some DOM-based functionality. Semantically, there is zero change; however, one thing to keep in mind is that helper functions generate DOM objects (not strings), so you can't just concatenate together and hope for the best. To achieve a similar effect, create a document fragment and return it instead.
 
 ### Getters
 
-To provide a custom getter function, just set it under `DOMBars.get`. The function accepts two arguments (`object` and `name`).
+To provide a custom getter function, just set `DOMBars.get` to your desired function. The function accepts two arguments, the `object` and `property`.
 
 ### Subscribers
 
-Subscriptions are used for doing data binding. By default, the subscription is a no-op. To set a custom subscription function, just alias it under `DOMBars.subscribe`. The function itself accepts three arguments (`object`, `name` and `callback`). For example, to do data binding in Backbone.js:
+Subscriptions are used to achieve data binding. By default, the subscription is a no-op. To set up your own custom subscription function, set `DOMBars.subscribe` to the disired subsciber. The function itself accepts three arguments - `object`, `property` and `callback`. For example, to do data binding with Backbone.js:
 
 ```js
-DOMBars.subscribe = function (object, name, callback) {
-  object.on('change:' + name, callback);
+DOMBars.subscribe = function (object, property, callback) {
+  object.on('change:' + property, callback);
+};
+```
+
+You also need to provide an unsubscribe function under `DOMBars.unsubscribe`. This function accepts the same three arguments - `object`, `property` and `callback`. The callback is the same function that was passed in with `DOMBars.subscribe`. For example, to unsubscribe a subscription in Backbone.js:
+
+```js
+DOMBars.unsubscribe = function (object, property, callback) {
+  object.off('change:' + property, callback);
 };
 ```
 
@@ -39,7 +47,7 @@ var template = DOMBars.compile(
   test: false
 });
 
-// Append the template directly to the body element.
+// Append the template directly to the body element and watch the magic happen.
 document.body.appendChild(template);
 ```
 
