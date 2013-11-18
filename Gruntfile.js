@@ -35,7 +35,7 @@ module.exports = function (grunt) {
      */
     jshint: {
       all: {
-        src: ['lib/**/*.js', 'Gruntfile.js', 'test/**/*.js']
+        src: ['lib/**/*.js', 'test/**/*.js', '*.js']
       },
       options: {
         jshintrc: '.jshintrc'
@@ -49,22 +49,22 @@ module.exports = function (grunt) {
      */
     browserify: {
       debug: {
-        src:  'lib/dombars.js',
+        src:  'dombars.js',
         dest: 'dist/dombars.js',
         options: debugOptions
       },
       minify: {
-        src:  'lib/dombars.js',
+        src:  'dombars.js',
         dest: 'dist/dombars.min.js',
         options: minifyOptions
       },
       'debug-runtime': {
-        src: 'lib/dombars.runtime.js',
+        src: 'runtime.js',
         dest: 'dist/dombars.runtime.js',
         options: debugOptions
       },
       'minify-runtime': {
-        src:  'lib/dombars.runtime.js',
+        src:  'runtime.js',
         dest: 'dist/dombars.runtime.min.js',
         options: minifyOptions
       }

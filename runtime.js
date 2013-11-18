@@ -1,6 +1,6 @@
-var base     = require('./dombars/base');
-var utils    = require('./dombars/utils');
-var runtime  = require('./dombars/runtime');
+var base     = require('./lib/base');
+var utils    = require('./lib/utils');
+var runtime  = require('./lib/runtime');
 
 /**
  * Generate the base DOMBars object.

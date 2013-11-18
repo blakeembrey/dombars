@@ -1,7 +1,7 @@
-var base     = require('./dombars/base');
-var compiler = require('./dombars/compiler');
-var utils    = require('./dombars/utils');
-var runtime  = require('./dombars/runtime');
+var base     = require('./lib/base');
+var compiler = require('./lib/compiler');
+var utils    = require('./lib/utils');
+var runtime  = require('./lib/runtime');
 
 /**
  * Generate the base DOMBars object.
@@ -16,7 +16,7 @@ module.exports = (function create () {
   runtime.attach(DOMBars);
 
   DOMBars.create     = create;
-  DOMBars.Handlebars = require('./dombars/handlebars');
+  DOMBars.Handlebars = require('./lib/handlebars');
 
   return DOMBars;
 })();
