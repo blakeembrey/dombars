@@ -876,54 +876,79 @@ describe('Compiler', function () {
         });
 
         describe('Advanced Usage', function () {
-          it('should update nested helpers', function (done) {
-            DOMBars.subscribe = function (obj, name, fn) {
-              if (name !== 'test') { return; }
+          describe('Boolean Switch', function () {
+            beforeEach(function () {
+              DOMBars.subscribe = function (obj, name, fn) {
+                if (name !== 'test') { return; }
 
-              obj.test = false;
-              setTimeout(fn, 100);
-            };
+                obj[name] = !obj[name];
+                setTimeout(fn, 100);
+              };
+            });
 
-            var template = DOMBars.compile(
-              '{{#test}}{{more}}{{/test}}'
-            )({
-              test: {
-                more: 'racecar'
+            it('should update nested helpers', function (done) {
+              var template = DOMBars.compile(
+                '{{#test}}{{more}}{{/test}}'
+              )({
+                test: {
+                  more: 'racecar'
+                }
+              });
+
+              fixture.appendChild(template);
+              expect(fixture.innerHTML).to.equal('racecar');
+
+              clock.tick(100);
+
+              DOMBars.Utils.requestAnimationFrame(function () {
+                expect(fixture.innerHTML).to.equal('');
+                return done();
+              });
+            });
+
+            it('should update conditional block helpers', function (done) {
+              var template = DOMBars.compile(
+                '{{#if test}}true{{else}}false{{/if}}'
+              )({ test: true });
+
+              fixture.appendChild(template);
+              expect(fixture.innerHTML).to.equal('true');
+
+              clock.tick(100);
+
+              DOMBars.Utils.requestAnimationFrame(function () {
+                expect(fixture.innerHTML).to.equal('false');
+                return done();
+              });
+            });
+
+            it(
+              'should call unsubscriptions when code is no longer reachable',
+              function (done) {
+                var spy = sinon.spy();
+
+                DOMBars.registerHelper('helper', function () {
+                  DOMBars.VM.unsubscribe(spy);
+
+                  return 'helper';
+                });
+
+                var template = DOMBars.compile(
+                  '{{#test}}{{helper}}{{/test}}'
+                )({ test: true });
+
+                fixture.appendChild(template);
+                expect(fixture.innerHTML).to.equal('helper');
+
+                clock.tick(100);
+
+                DOMBars.Utils.requestAnimationFrame(function () {
+                  expect(spy).to.have.been.calledOnce;
+                  expect(fixture.innerHTML).to.equal('');
+                  return done();
+                });
               }
-            });
-
-            fixture.appendChild(template);
-            expect(fixture.innerHTML).to.equal('racecar');
-
-            clock.tick(100);
-
-            DOMBars.Utils.requestAnimationFrame(function () {
-              expect(fixture.innerHTML).to.equal('');
-              return done();
-            });
-          });
-
-          it('should update conditional block helpers', function (done) {
-            DOMBars.subscribe = function (obj, name, fn) {
-              if (name !== 'test') { return; }
-
-              obj.test = false;
-              setTimeout(fn, 100);
-            };
-
-            var template = DOMBars.compile(
-              '{{#if test}}true{{else}}false{{/if}}'
-            )({ test: true });
-
-            fixture.appendChild(template);
-            expect(fixture.innerHTML).to.equal('true');
-
-            clock.tick(100);
-
-            DOMBars.Utils.requestAnimationFrame(function () {
-              expect(fixture.innerHTML).to.equal('false');
-              return done();
-            });
+            );
           });
         });
       });

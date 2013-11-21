@@ -32,13 +32,15 @@ DOMBars.unsubscribe = function (object, property, callback) {
 };
 ```
 
-## Example
+## Examples
+
+### Subscribers
 
 ```js
 // Set a custom subscription function just for the test.
 DOMBars.subscribe = function (obj, name, fn) {
   // Every 2 seconds we will be turning the checkbox on and off again.
-  setInterval(function () {
+  window.setInterval(function () {
     obj[name] = !obj[name];
     fn();
   }, 2000);
@@ -52,6 +54,29 @@ var template = DOMBars.compile(
 });
 
 // Append the template directly to the body element and watch the magic happen.
+document.body.appendChild(template);
+```
+
+### Helpers
+
+```js
+DOMBars.registerHelper('currentTime', function () {
+  var node = document.createTextNode(new Date().toLocaleTimeString());
+
+  var interval = window.setInterval(function () {
+    node.textContent = new Date().toLocaleTimeString();
+  }, 1000);
+
+  // Use the VM unsubscribe method to register a way to remove helper listeners.
+  DOMBars.VM.unsubscribe(function () {
+    window.clearInterval(interval);
+  });
+
+  return node;
+});
+
+var template = DOMBars.compile('{{currentTime}}')();
+
 document.body.appendChild(template);
 ```
 
