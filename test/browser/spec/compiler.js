@@ -620,7 +620,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('after');
               return done();
             });
@@ -634,7 +634,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('go after');
               return done();
             });
@@ -648,7 +648,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('after after');
               return done();
             });
@@ -662,7 +662,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<div>after</div>');
               return done();
             });
@@ -676,7 +676,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<div>after</div>');
               return done();
             });
@@ -690,7 +690,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<div class="after"></div>');
               return done();
             });
@@ -708,7 +708,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal(
                 '<div class="test after"></div>'
               );
@@ -724,7 +724,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<div after="attr"></div>');
               return done();
             });
@@ -742,7 +742,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal(
                 '<div some-after="attr"></div>'
               );
@@ -760,7 +760,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<after some="attr"></after>');
               return done();
             });
@@ -778,7 +778,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal(
                 '<tag-after some="attr"></tag-after>'
               );
@@ -802,7 +802,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('helper after');
               return done();
             });
@@ -818,7 +818,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('<!-- after -->');
               return done();
             });
@@ -840,7 +840,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal(
                 '<tag-after attr-after="content after" ' +
                 'another-after="more after">after text after' +
@@ -868,7 +868,7 @@ describe('Compiler', function () {
 
             clock.tick(100);
 
-            DOMBars.Utils.requestAnimationFrame(function () {
+            DOMBars.VM.exec(function () {
               expect(fixture.innerHTML).to.equal('after');
               return done();
             });
@@ -900,7 +900,7 @@ describe('Compiler', function () {
 
               clock.tick(100);
 
-              DOMBars.Utils.requestAnimationFrame(function () {
+              DOMBars.VM.exec(function () {
                 expect(fixture.innerHTML).to.equal('');
                 return done();
               });
@@ -916,7 +916,7 @@ describe('Compiler', function () {
 
               clock.tick(100);
 
-              DOMBars.Utils.requestAnimationFrame(function () {
+              DOMBars.VM.exec(function () {
                 expect(fixture.innerHTML).to.equal('false');
                 return done();
               });
@@ -942,7 +942,7 @@ describe('Compiler', function () {
 
                 clock.tick(100);
 
-                DOMBars.Utils.requestAnimationFrame(function () {
+                DOMBars.VM.exec(function () {
                   expect(spy).to.have.been.calledOnce;
                   expect(fixture.innerHTML).to.equal('');
                   return done();

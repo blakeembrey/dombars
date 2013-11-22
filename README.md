@@ -32,6 +32,10 @@ DOMBars.unsubscribe = function (object, property, callback) {
 };
 ```
 
+### Unsubscribing
+
+DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned DOM element. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
+
 ## Examples
 
 ### Subscribers
