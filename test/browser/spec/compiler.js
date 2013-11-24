@@ -1,8 +1,9 @@
-/* global describe, it, expect, before, after, beforeEach, afterEach, sinon */
-/* global DOMBars */
+/* global describe, it, expect, beforeEach, afterEach, sinon, DOMBars */
 
 describe('Compiler', function () {
-  var fixture = document.getElementById('fixture');
+  var fixture       = document.getElementById('fixture');
+  var prevGet       = DOMBars.get;
+  var prevSubscribe = DOMBars.subscribe;
   var clock;
 
   it('should exist', function () {
@@ -12,12 +13,14 @@ describe('Compiler', function () {
     expect(DOMBars.JavaScriptCompiler).to.exist;
   });
 
-  before(function () {
+  beforeEach(function () {
     clock = sinon.useFakeTimers();
   });
 
-  after(function () {
+  afterEach(function () {
     clock.restore();
+    DOMBars.get       = prevGet;
+    DOMBars.subscribe = prevSubscribe;
   });
 
   describe('Compiling Templates', function () {
@@ -590,14 +593,6 @@ describe('Compiler', function () {
       });
 
       describe('Data Binding', function () {
-        var oldGet       = DOMBars.get;
-        var oldSubscribe = DOMBars.subscribe;
-
-        afterEach(function () {
-          DOMBars.get       = oldGet;
-          DOMBars.subscribe = oldSubscribe;
-        });
-
         describe('Expressions', function () {
           beforeEach(function () {
             var i = 0;
