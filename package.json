@@ -1,6 +1,6 @@
 {
   "name": "dombars",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "An extension of Handlebars that generates DOM objects instead of strings.",
   "main": "./dombars.js",
   "scripts": {
