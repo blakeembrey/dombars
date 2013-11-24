@@ -36,6 +36,42 @@ DOMBars.unsubscribe = function (object, property, callback) {
 
 DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned DOM element. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
 
+For custom helpers that need to be unsubscribed, a function is made available under `DOMBars.VM.unsubscribe`. Pass in the function that needs to be called to unsubscribe, and when the helper is destroyed the unsubscribe function will be called.
+
+### Events
+
+DOMBars will emit events during the contruction of every template. This allows the creation of some amazing plugins and optimized attaching of event listeners to the DOM, since you no longer need to do DOM traversal. During any template execution, you can access the the current execution context on `DOMBars.VM.context`.
+
+To listen to events, you can subscribe using the regular `DOMBars.on` or `DOMBars.once` for a callback that should only run once.
+
+**createElement** (el)
+
+Triggered any time an element in the template is created. This occurs before the element has any attributes or is appended to the DOM.
+
+**createComment** (el)
+
+Triggered any time a comment node is created from the template. This occurs before the comment has been appended to the DOM.
+
+**setAttribute** (el, name, value)
+
+Triggered when an attribute is set on an element in the template. This occurs right before the attribute is set.
+
+**removeAttribute** (el, name)
+
+Triggered when an attribute is removed from an element in the template. This occurs right before the attribute is removed.
+
+**appendChild** (parent, child)
+
+Triggered any time a child node is appended to the template. This occurs before the child is actually appended.
+
+**domify** (dom)
+
+Triggered any time a Handlebars expression is transformed to DOM. This occurs whenever a Handlebars triple-stash is used as text.
+
+**textify** (node)
+
+Triggered any time a Handlbars expression is transformed into a text node. This will occur whenever a Handlebars expression is used as text.
+
 ## Examples
 
 ### Subscribers
@@ -83,6 +119,10 @@ var template = DOMBars.compile('{{currentTime}}')();
 
 document.body.appendChild(template);
 ```
+
+## Plugins
+
+* [node-dombarsify](https://github.com/blakeembrey/node-dombarsify) - DOMBars precompiler plugin for Browserify
 
 ## License
 
