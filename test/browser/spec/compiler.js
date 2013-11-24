@@ -1,13 +1,23 @@
-/* global describe, it, expect, beforeEach, afterEach, DOMBars, sinon */
+/* global describe, it, expect, before, after, beforeEach, afterEach, sinon */
+/* global DOMBars */
 
 describe('Compiler', function () {
   var fixture = document.getElementById('fixture');
+  var clock;
 
   it('should exist', function () {
     expect(DOMBars.precompile).to.exist;
     expect(DOMBars.compile).to.exist;
     expect(DOMBars.Compiler).to.exist;
     expect(DOMBars.JavaScriptCompiler).to.exist;
+  });
+
+  before(function () {
+    clock = sinon.useFakeTimers();
+  });
+
+  after(function () {
+    clock.restore();
   });
 
   describe('Compiling Templates', function () {
@@ -582,14 +592,8 @@ describe('Compiler', function () {
       describe('Data Binding', function () {
         var oldGet       = DOMBars.get;
         var oldSubscribe = DOMBars.subscribe;
-        var clock;
-
-        beforeEach(function () {
-          clock = sinon.useFakeTimers();
-        });
 
         afterEach(function () {
-          clock.restore();
           DOMBars.get       = oldGet;
           DOMBars.subscribe = oldSubscribe;
         });
@@ -952,6 +956,78 @@ describe('Compiler', function () {
           });
         });
       });
+    });
+  });
+
+  describe('Events', function () {
+    it('should trigger an event when an element is created', function () {
+      DOMBars.once('createElement', function (el) {
+        expect(el.tagName).to.equal('SPAN');
+      });
+
+      DOMBars.compile('<span></span>')();
+    });
+
+    it('should trigger an event when a comment node is created', function () {
+      DOMBars.once('createComment', function (comment) {
+        expect(comment.textContent).to.equal(' Test ');
+      });
+
+      DOMBars.compile('<!-- Test -->')();
+    });
+
+    it('should trigger an event when an attribute is set', function () {
+      DOMBars.once('setAttribute', function (el, name, value) {
+        expect(el.tagName).to.equal('P');
+        expect(name).to.equal('this');
+        expect(value).to.equal('that');
+      });
+
+      DOMBars.compile('<p this="that"></p>')();
+    });
+
+    it('should trigger an event when an attribute is removed', function (done) {
+      DOMBars.subscribe = function (obj, name, fn) {
+        obj[name] = !obj[name];
+        setTimeout(fn, 100);
+      };
+
+      DOMBars.once('removeAttribute', function (el, name) {
+        expect(el.tagName).to.equal('DIV');
+        expect(name).to.equal('test');
+        return done();
+      });
+
+      DOMBars.compile('<div test="{{{test}}}"></div>')({
+        test: true
+      });
+
+      clock.tick(100);
+    });
+
+    it('should trigger an event any time a child is appended', function () {
+      DOMBars.once('appendChild', function (parent, child) {
+        expect(parent.tagName).to.equal('DIV');
+        expect(child.textContent).to.equal('appended');
+      });
+
+      DOMBars.compile('<div>appended</div>')();
+    });
+
+    it('should trigger an event with every text expression', function () {
+      DOMBars.once('textify', function (text) {
+        expect(text.textContent).to.equal('test content');
+      });
+
+      DOMBars.compile('{{test}}')({ test: 'test content' });
+    });
+
+    it('should trigger an event with every dom expression', function () {
+      DOMBars.once('domify', function (dom) {
+        expect(dom.innerHTML).to.equal('<p>testing</p>');
+      });
+
+      DOMBars.compile('{{{test}}}')({ test: '<div><p>testing</p></div>' });
     });
   });
 });
