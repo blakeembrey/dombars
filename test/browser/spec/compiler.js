@@ -875,6 +875,81 @@ describe('Compiler', function () {
         });
 
         describe('Advanced Usage', function () {
+          describe('Property Updates', function () {
+            var i;
+
+            var valueMap = {
+              0: 'before',
+              1: '',
+              2: 'after'
+            };
+
+            beforeEach(function () {
+              i = 0;
+
+              DOMBars.get = function () {
+                return valueMap[i++];
+              };
+
+              DOMBars.subscribe = function (obj, name, fn) {
+                setTimeout(fn, 100);
+              };
+            });
+
+            it('should be able to update input values', function (done) {
+              var template = DOMBars.compile('<input value="{{test}}">')();
+
+              fixture.appendChild(template);
+
+              expect(fixture.innerHTML).to.equal('<input value="before">');
+              expect(fixture.firstChild.value).to.equal('before');
+
+              clock.tick(100);
+
+              DOMBars.VM.exec(function () {
+                expect(fixture.innerHTML).to.equal('<input value="">');
+                expect(fixture.firstChild.value).to.equal('');
+
+                clock.tick(100);
+
+                DOMBars.VM.exec(function () {
+                  expect(fixture.innerHTML).to.equal('<input value="after">');
+                  expect(fixture.firstChild.value).to.equal('after');
+
+                  return done();
+                });
+              });
+            });
+
+            it('should be able to update textarea values', function (done) {
+              var template = DOMBars.compile('<textarea>{{test}}</textarea>')();
+
+              fixture.appendChild(template);
+
+              expect(fixture.innerHTML).to.equal('<textarea>before</textarea>');
+              expect(fixture.firstChild.value).to.equal('before');
+
+              clock.tick(100);
+
+              DOMBars.VM.exec(function () {
+                expect(fixture.innerHTML).to.equal('<textarea></textarea>');
+                expect(fixture.firstChild.value).to.equal('');
+
+                clock.tick(100);
+
+                DOMBars.VM.exec(function () {
+                  expect(fixture.innerHTML).to.equal(
+                    '<textarea>after</textarea>'
+                  );
+                  expect(fixture.firstChild.value).to.equal('after');
+
+                  return done();
+                });
+              });
+
+            });
+          });
+
           describe('Boolean Switch', function () {
             beforeEach(function () {
               DOMBars.subscribe = function (obj, name, fn) {
