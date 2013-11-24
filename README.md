@@ -62,7 +62,7 @@ Triggered when an attribute is removed from an element in the template. This occ
 
 **appendChild** (parent, child)
 
-Triggered any time a child node is appended to the template. This occurs before the child is actually appended.
+Triggered any time a child node is appended to the template. This occurs after the child has been appended.
 
 **domify** (dom)
 
