@@ -259,6 +259,18 @@ describe('Compiler', function () {
           fixture.appendChild(template);
           expect(fixture.innerHTML).to.equal('<input type="checkbox">');
         });
+
+        it('should not escape attributes with special characters', function () {
+          var template = DOMBars.compile(
+            '<div test="{{{test}}}"></div>'
+          )({
+            test: 'Test &\'"'
+          });
+
+          fixture.appendChild(template);
+          expect(fixture.firstChild.tagName).to.equal('DIV');
+          expect(fixture.firstChild.getAttribute('test')).to.equal('Test &\'"');
+        });
       });
 
       describe('Children', function () {
