@@ -68,6 +68,13 @@ describe('Compiler', function () {
       expect(fixture.innerHTML).to.equal('testing');
     });
 
+    it('should not escape text expressions', function () {
+      var template = DOMBars.compile('{{test}}')({ test: '& \' "' });
+
+      fixture.appendChild(template);
+      expect(fixture.textContent).to.equal('& \' "');
+    });
+
     describe('Text and Expressions', function () {
       it('should compile text before expressions', function () {
         var template = DOMBars.compile('test {{test}}')({
