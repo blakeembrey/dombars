@@ -33,6 +33,11 @@ describe('Compiler', function () {
       expect(fixture.innerHTML).to.equal('testing');
     });
 
+    it('should correctly unescape text', function () {
+      fixture.appendChild(DOMBars.compile('&amp;')());
+      expect(fixture.innerHTML).to.equal('&amp;');
+    });
+
     it('should compile expressions', function () {
       var template = DOMBars.compile('{{test}}')({
         test: 'testing'
