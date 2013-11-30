@@ -38,6 +38,6 @@
   "dependencies": {
     "htmlparser2": "~3.3.0",
     "handlebars": "~1.0.12",
-    "raf-component": "git://github.com/component/raf"
+    "raf-component": "~1.1.2"
   }
 }
