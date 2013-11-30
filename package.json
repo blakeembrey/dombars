@@ -33,11 +33,11 @@
     "grunt-newer": "~0.5.4",
     "sinon-chai": "~2.4.0",
     "sinon": "~1.7.3",
-    "grunt-contrib-uglify": "~0.2.5"
+    "grunt-contrib-uglify": "~0.2.7"
   },
   "dependencies": {
     "htmlparser2": "~3.3.0",
     "handlebars": "~1.0.12",
-    "raf-component": "~1.1.1"
+    "raf-component": "git://github.com/component/raf"
   }
 }
