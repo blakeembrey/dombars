@@ -64,14 +64,6 @@ Triggered when an attribute is removed from an element in the template. This occ
 
 Triggered any time a child node is appended to the template. This occurs after the child has been appended.
 
-**domify** (dom)
-
-Triggered any time a Handlebars expression is transformed to DOM. This occurs whenever a Handlebars triple-stash is used as text.
-
-**textify** (node)
-
-Triggered any time a Handlbars expression is transformed into a text node. This will occur whenever a Handlebars expression is used as text.
-
 ## Examples
 
 ### Subscribers

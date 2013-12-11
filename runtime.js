@@ -1,19 +1,26 @@
-var base     = require('./lib/base');
-var utils    = require('./lib/utils');
-var runtime  = require('./lib/runtime');
+var base       = require('./lib/base');
+var SafeString = require('./lib/safe-string');
+var Exception  = require('./lib/exception');
+var Utils      = require('./lib/utils');
+var Events     = require('./lib/events');
+var runtime    = require('./lib/runtime');
 
-/**
- * Generate the base DOMBars object.
- *
- * @return {Object}
- */
+// Extend the DOMBars prototype with event emitter functionality.
+Utils.extend(base.DOMBarsEnvironment.prototype, Events);
+
 module.exports = (function create () {
-  var DOMBars = base.create();
+  var db = new base.DOMBarsEnvironment();
 
-  utils.attach(DOMBars);
-  runtime.attach(DOMBars);
+  Utils.extend(db, base);
+  db.VM         = runtime;
+  db.Utils      = Utils;
+  db.create     = create;
+  db.Exception  = Exception;
+  db.SafeString = SafeString;
 
-  DOMBars.create = create;
+  db.template = function (spec) {
+    return runtime.template(spec, db);
+  };
 
-  return DOMBars;
+  return db;
 })();

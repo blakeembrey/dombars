@@ -1,22 +1,23 @@
-var base     = require('./lib/base');
-var compiler = require('./lib/compiler');
-var utils    = require('./lib/utils');
-var runtime  = require('./lib/runtime');
+var DOMBars            = require('./runtime');
+var AST                = require('./lib/compiler/ast');
+var base               = require('./lib/compiler/base');
+var Compiler           = require('./lib/compiler/compiler');
+var JavaScriptCompiler = require('./lib/compiler/javascript-compiler');
 
-/**
- * Generate the base DOMBars object.
- *
- * @return {Object}
- */
 module.exports = (function create () {
-  var DOMBars = base.create();
+  var db = DOMBars.create();
 
-  utils.attach(DOMBars);
-  compiler.attach(DOMBars);
-  runtime.attach(DOMBars);
+  db.compile = function (input, options) {
+    return Compiler.compile(input, options, db);
+  };
 
-  DOMBars.create     = create;
-  DOMBars.Handlebars = require('./lib/handlebars');
+  db.create             = create;
+  db.precompile         = Compiler.precompile;
+  db.AST                = AST;
+  db.Compiler           = Compiler.Compiler;
+  db.JavaScriptCompiler = JavaScriptCompiler;
+  db.parse              = base.parse;
+  db.Parser             = base.parser;
 
-  return DOMBars;
+  return db;
 })();
