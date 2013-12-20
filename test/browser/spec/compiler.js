@@ -562,7 +562,7 @@ describe('Compiler', function () {
               helpers: {
                 test: function (options) {
                   var el = document.createElement('span');
-                  el.appendChild(options.fn());
+                  el.appendChild(options.fn().value);
                   return el;
                 }
               }
@@ -885,7 +885,7 @@ describe('Compiler', function () {
                 helper: function (value, options) {
                   return options.fn({
                     value: value
-                  });
+                  }).value;
                 }
               }
             });

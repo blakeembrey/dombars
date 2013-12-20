@@ -64,6 +64,16 @@ Triggered when an attribute is removed from an element in the template. This occ
 
 Triggered any time a child node is appended to the template. This occurs after the child has been appended to the parent, allowing access to the `parentNode` property.
 
+### Helpers
+
+#### Attributes
+
+A helper can check the context in which it is being compiled by checking the boolean `attribute` property on the passed in `options`.
+
+#### Block helpers
+
+The `fn` and `inverse` properties of block helpers return an object the same as the root template function. This allows you to unsubscribe individual block helpers if you happen to call it multiple times.
+
 ## Examples
 
 ### Subscribers
