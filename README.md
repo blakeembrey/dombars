@@ -34,13 +34,13 @@ DOMBars.unsubscribe = function (object, property, callback) {
 
 ### Unsubscribing
 
-DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned DOM element. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
+DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned object. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
 
-For custom helpers that need to be unsubscribed, a function is made available under `DOMBars.VM.unsubscribe`. Pass in the function that needs to be called to unsubscribe, and when the helper is destroyed the unsubscribe function will be called.
+For custom helpers that need to be unsubscribed, a function is made available under `DOMBars.VM.unsubscribe`. Pass in the function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
 
 ### Events
 
-DOMBars will emit events during the contruction of every template. This allows the creation of some amazing plugins and optimized attaching of event listeners to the DOM, since you no longer need to do DOM traversal. During any template execution, you can access the the current execution context on `DOMBars.VM.context`.
+DOMBars will emit events during the contruction of every template. This allows the creation of some amazing plugins and optimized attaching of event listeners to the DOM, since you no longer need to do DOM traversal.
 
 To listen to events, you can subscribe using the regular `DOMBars.on` or `DOMBars.once` for a callback that should only run once.
 
@@ -54,7 +54,7 @@ Triggered any time a comment node is created from the template. This occurs befo
 
 **setAttribute** (el, name, value)
 
-Triggered when an attribute is set on an element in the template. This occurs right before the attribute is set.
+Triggered when an attribute is set on an element in the template. This occurs before the attribute is set, so it is possible to read the previous attribute (if any).
 
 **removeAttribute** (el, name)
 
@@ -62,7 +62,7 @@ Triggered when an attribute is removed from an element in the template. This occ
 
 **appendChild** (parent, child)
 
-Triggered any time a child node is appended to the template. This occurs after the child has been appended.
+Triggered any time a child node is appended to the template. This occurs after the child has been appended to the parent, allowing access to the `parentNode` property.
 
 ## Examples
 
@@ -86,7 +86,7 @@ var template = DOMBars.compile(
 });
 
 // Append the template directly to the body element and watch the magic happen.
-document.body.appendChild(template);
+document.body.appendChild(template.value);
 ```
 
 ### Helpers
@@ -109,7 +109,7 @@ DOMBars.registerHelper('currentTime', function () {
 
 var template = DOMBars.compile('{{currentTime}}')();
 
-document.body.appendChild(template);
+document.body.appendChild(template.value);
 ```
 
 ## Plugins

@@ -29,12 +29,12 @@ describe('Compiler', function () {
     });
 
     it('should compile text', function () {
-      fixture.appendChild(DOMBars.compile('testing')());
+      fixture.appendChild(DOMBars.compile('testing')().value);
       expect(fixture.innerHTML).to.equal('testing');
     });
 
     it('should correctly unescape text', function () {
-      fixture.appendChild(DOMBars.compile('&amp;')());
+      fixture.appendChild(DOMBars.compile('&amp;')().value);
       expect(fixture.innerHTML).to.equal('&amp;');
     });
 
@@ -43,7 +43,7 @@ describe('Compiler', function () {
         test: 'testing'
       });
 
-      fixture.appendChild(template);
+      fixture.appendChild(template.value);
       expect(fixture.innerHTML).to.equal('testing');
     });
 
@@ -56,7 +56,7 @@ describe('Compiler', function () {
         }
       });
 
-      fixture.appendChild(template);
+      fixture.appendChild(template.value);
       expect(fixture.innerHTML).to.equal('testing');
     });
 
@@ -69,14 +69,14 @@ describe('Compiler', function () {
         }
       });
 
-      fixture.appendChild(template);
+      fixture.appendChild(template.value);
       expect(fixture.innerHTML).to.equal('testing');
     });
 
     it('should not escape text expressions', function () {
       var template = DOMBars.compile('{{test}}')({ test: '& \' "' });
 
-      fixture.appendChild(template);
+      fixture.appendChild(template.value);
       expect(fixture.textContent).to.equal('& \' "');
     });
 
@@ -86,7 +86,7 @@ describe('Compiler', function () {
           test: 'again'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('test again');
       });
 
@@ -95,7 +95,7 @@ describe('Compiler', function () {
           test: 'another'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('another test');
       });
 
@@ -104,7 +104,7 @@ describe('Compiler', function () {
           test: 'more'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('one more test');
       });
 
@@ -114,14 +114,14 @@ describe('Compiler', function () {
           after:  'test'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('yet another test');
       });
     });
 
     describe('Comment Nodes', function () {
       it('should compile text', function () {
-        fixture.appendChild(DOMBars.compile('<!-- test -->')());
+        fixture.appendChild(DOMBars.compile('<!-- test -->')().value);
         expect(fixture.innerHTML).to.equal('<!-- test -->');
       });
 
@@ -130,7 +130,7 @@ describe('Compiler', function () {
           test: 'test'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('<!-- test -->');
       });
 
@@ -139,14 +139,14 @@ describe('Compiler', function () {
           mixing: 'more'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('<!-- test more content -->');
       });
     });
 
     describe('Element Nodes', function () {
       it('should compile text', function () {
-        fixture.appendChild(DOMBars.compile('<div></div>')());
+        fixture.appendChild(DOMBars.compile('<div></div>')().value);
         expect(fixture.innerHTML).to.equal('<div></div>');
       });
 
@@ -155,7 +155,7 @@ describe('Compiler', function () {
           test: 'div'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('<div></div>');
       });
 
@@ -164,7 +164,7 @@ describe('Compiler', function () {
           test: 'custom'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal('<custom-tag></custom-tag>');
       });
 
@@ -175,7 +175,7 @@ describe('Compiler', function () {
           test: 'text'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal(
           '<div>text</div><span>text</span>'
         );
@@ -185,18 +185,20 @@ describe('Compiler', function () {
         var template = DOMBars.compile(
           '<h1>{{title}}</h1><input value="{{title}}">'
         )({
-          title: 'Test'
+          title: 'Testing'
         });
 
-        fixture.appendChild(template);
+        fixture.appendChild(template.value);
         expect(fixture.innerHTML).to.equal(
-          '<h1>Test</h1><input value="Test">'
+          '<h1>Testing</h1><input value="Testing">'
         );
       });
 
       describe('Attributes', function () {
         it('should compile text', function () {
-          fixture.appendChild(DOMBars.compile('<div class="test"></div>')());
+          var template = DOMBars.compile('<div class="test"></div>')();
+
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div class="test"></div>');
         });
 
@@ -205,7 +207,7 @@ describe('Compiler', function () {
             test: 'value'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div class="value"></div>');
         });
 
@@ -214,7 +216,7 @@ describe('Compiler', function () {
             test: 'attribute'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div attribute="value"></div>');
         });
 
@@ -223,7 +225,7 @@ describe('Compiler', function () {
             '<div some="here" attribute="there"></div>'
           )();
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal(
             '<div some="here" attribute="there"></div>'
           );
@@ -238,7 +240,7 @@ describe('Compiler', function () {
               test: 'class'
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<div class="some class here"></div>'
             );
@@ -254,7 +256,7 @@ describe('Compiler', function () {
               test: 'attribute'
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<div some-attribute-here="test"></div>'
             );
@@ -268,7 +270,7 @@ describe('Compiler', function () {
             test: false
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<input type="checkbox">');
         });
 
@@ -279,7 +281,7 @@ describe('Compiler', function () {
             test: 'Test &\'"'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.firstChild.tagName).to.equal('DIV');
           expect(fixture.firstChild.getAttribute('test')).to.equal('Test &\'"');
         });
@@ -287,7 +289,9 @@ describe('Compiler', function () {
 
       describe('Children', function () {
         it('should compile text', function () {
-          fixture.appendChild(DOMBars.compile('<div>test</div>')());
+          var template = DOMBars.compile('<div>test</div>')();
+
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>test</div>');
         });
 
@@ -296,7 +300,7 @@ describe('Compiler', function () {
             test: 'test content'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>test content</div>');
         });
 
@@ -305,19 +309,19 @@ describe('Compiler', function () {
             test: 'content'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>some content here</div>');
         });
 
         it('should compile child elements', function () {
           var template = DOMBars.compile('<div><div></div></div>')();
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
 
         it('should compile child elements and text', function () {
           var template = DOMBars.compile('<div>test <div></div></div>')();
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>test <div></div></div>');
         });
 
@@ -328,7 +332,7 @@ describe('Compiler', function () {
             test: 'expression'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal(
             '<div>test <div></div> expression</div>'
           );
@@ -339,7 +343,7 @@ describe('Compiler', function () {
             test: '<div></div>'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
 
@@ -348,7 +352,7 @@ describe('Compiler', function () {
             test: 'text'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>text</div>');
         });
 
@@ -357,7 +361,7 @@ describe('Compiler', function () {
             test: '<div></div>'
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal(
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
           );
@@ -368,7 +372,7 @@ describe('Compiler', function () {
             test: document.createElement('div')
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal(
             '<div>&lt;div&gt;&lt;/div&gt;</div>'
           );
@@ -381,7 +385,7 @@ describe('Compiler', function () {
             test: new DOMBars.SafeString('<div></div>')
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
 
@@ -390,7 +394,7 @@ describe('Compiler', function () {
             test: new DOMBars.SafeString('<div></div>')
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div><div></div></div>');
         });
       });
@@ -403,7 +407,7 @@ describe('Compiler', function () {
             }
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>some data</div>');
         });
       });
@@ -411,13 +415,13 @@ describe('Compiler', function () {
       describe('Comment Expression', function () {
         it('should not output comment nodes in the template', function () {
           var template = DOMBars.compile('<div>{{! comment }}</div>')();
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div></div>');
         });
 
         it('should not output comment nodes beside text', function () {
           var template = DOMBars.compile('<div>text {{! comment }}</div>')();
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div>text </div>');
         });
       });
@@ -431,7 +435,7 @@ describe('Compiler', function () {
               test: ['this', 'that', 'another thing']
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<ul>' +
                 '<li>0 = this</li><li>1 = that</li><li>2 = another thing</li>' +
@@ -446,7 +450,7 @@ describe('Compiler', function () {
               test: true
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div></div>');
           });
 
@@ -457,7 +461,7 @@ describe('Compiler', function () {
               test: false
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div></div>');
           });
 
@@ -472,7 +476,7 @@ describe('Compiler', function () {
               }
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<span>I know something goes here</span>'
             );
@@ -503,7 +507,7 @@ describe('Compiler', function () {
               }]
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal([
               '<h1>Comments</h1>',
               '',
@@ -532,7 +536,7 @@ describe('Compiler', function () {
                 }
               });
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
               expect(fixture.innerHTML).to.equal('&lt;div&gt;&lt;/div&gt;');
             }
           );
@@ -548,7 +552,7 @@ describe('Compiler', function () {
                 }
               });
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
               expect(fixture.innerHTML).to.equal('<div></div>');
             }
           );
@@ -564,7 +568,7 @@ describe('Compiler', function () {
               }
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<span>content</span>');
           });
         });
@@ -575,7 +579,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('{{#test}}text{{/test}}')({
             test: true
           });
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('text');
         });
 
@@ -583,7 +587,7 @@ describe('Compiler', function () {
           var template = DOMBars.compile('{{#test}}<div></div>{{/test}}')({
             test: true
           });
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<div></div>');
         });
 
@@ -600,7 +604,7 @@ describe('Compiler', function () {
             }
           });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal(
             '<div><span>test</span></div>'
           );
@@ -611,7 +615,7 @@ describe('Compiler', function () {
             '{{#test}}<div></div>{{else}}<span></span>{{/test}}'
           )({ test: false });
 
-          fixture.appendChild(template);
+          fixture.appendChild(template.value);
           expect(fixture.innerHTML).to.equal('<span></span>');
         });
       });
@@ -638,7 +642,7 @@ describe('Compiler', function () {
           it('should update a single expression', function (done) {
             var template = DOMBars.compile('{{test}}')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('before');
 
             clock.tick(100);
@@ -652,7 +656,7 @@ describe('Compiler', function () {
           it('should update expression beside text', function (done) {
             var template = DOMBars.compile('go {{test}}')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('go before');
 
             clock.tick(100);
@@ -666,7 +670,7 @@ describe('Compiler', function () {
           it('should update multiple expressions', function (done) {
             var template = DOMBars.compile('{{test}} {{test}}')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('before before');
 
             clock.tick(100);
@@ -680,7 +684,7 @@ describe('Compiler', function () {
           it('should update inside an element', function (done) {
             var template = DOMBars.compile('<div>{{test}}</div>')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div>before</div>');
 
             clock.tick(100);
@@ -694,7 +698,7 @@ describe('Compiler', function () {
           it('should update un-escaped expressions', function (done) {
             var template = DOMBars.compile('<div>{{{test}}}</div>')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div>before</div>');
 
             clock.tick(100);
@@ -708,7 +712,7 @@ describe('Compiler', function () {
           it('should update attribute values', function (done) {
             var template = DOMBars.compile('<div class="{{test}}"></div>')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div class="before"></div>');
 
             clock.tick(100);
@@ -724,7 +728,7 @@ describe('Compiler', function () {
               '<div class="test {{test}}"></div>'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<div class="test before"></div>'
             );
@@ -742,7 +746,7 @@ describe('Compiler', function () {
           it('should update attribute names', function (done) {
             var template = DOMBars.compile('<div {{test}}="attr"></div>')();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<div before="attr"></div>');
 
             clock.tick(100);
@@ -758,7 +762,7 @@ describe('Compiler', function () {
               '<div some-{{test}}="attr"></div>'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<div some-before="attr"></div>'
             );
@@ -778,7 +782,7 @@ describe('Compiler', function () {
               '<{{test}} some="attr"></{{test}}>'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<before some="attr"></before>');
 
             clock.tick(100);
@@ -794,7 +798,7 @@ describe('Compiler', function () {
               '<tag-{{test}} some="attr"></tag-{{test}}>'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<tag-before some="attr"></tag-before>'
             );
@@ -820,7 +824,7 @@ describe('Compiler', function () {
               }
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('helper before');
 
             clock.tick(100);
@@ -836,7 +840,7 @@ describe('Compiler', function () {
               '<!-- {{test}} -->'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('<!-- before -->');
 
             clock.tick(100);
@@ -854,7 +858,7 @@ describe('Compiler', function () {
               '</tag-{{test}}>'
             )();
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal(
               '<tag-before attr-before="content before" ' +
               'another-before="more before">before text before' +
@@ -886,7 +890,7 @@ describe('Compiler', function () {
               }
             });
 
-            fixture.appendChild(template);
+            fixture.appendChild(template.value);
             expect(fixture.innerHTML).to.equal('before');
 
             clock.tick(100);
@@ -923,7 +927,7 @@ describe('Compiler', function () {
             it('should be able to update input values', function (done) {
               var template = DOMBars.compile('<input value="{{test}}">')();
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
 
               expect(fixture.innerHTML).to.equal('<input value="before">');
               expect(fixture.firstChild.value).to.equal('before');
@@ -948,7 +952,7 @@ describe('Compiler', function () {
             it('should be able to update textarea values', function (done) {
               var template = DOMBars.compile('<textarea>{{test}}</textarea>')();
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
 
               expect(fixture.innerHTML).to.equal('<textarea>before</textarea>');
               expect(fixture.firstChild.value).to.equal('before');
@@ -993,7 +997,7 @@ describe('Compiler', function () {
                 }
               });
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
               expect(fixture.innerHTML).to.equal('racecar');
 
               clock.tick(100);
@@ -1009,7 +1013,7 @@ describe('Compiler', function () {
                 '{{#if test}}true{{else}}false{{/if}}'
               )({ test: true });
 
-              fixture.appendChild(template);
+              fixture.appendChild(template.value);
               expect(fixture.innerHTML).to.equal('true');
 
               clock.tick(100);
@@ -1035,7 +1039,7 @@ describe('Compiler', function () {
                   '{{#test}}{{helper}}{{/test}}'
                 )({ test: true });
 
-                fixture.appendChild(template);
+                fixture.appendChild(template.value);
                 expect(fixture.innerHTML).to.equal('helper');
 
                 clock.tick(100);
