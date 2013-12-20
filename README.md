@@ -74,6 +74,34 @@ A helper can check the context in which it is being compiled by checking the boo
 
 The `fn` and `inverse` properties of block helpers return an object the same as the root template function. This allows you to unsubscribe individual block helpers if you happen to call it multiple times.
 
+### Utilities
+
+DOMBars extends the built-in Handlebars utilities with some additional functionality.
+
+#### Utils.uniqueId
+
+Used internally for keeping track of subscriptions, the `uniqueId` function returns a unique number each time its called.
+
+#### Utils.create
+
+A polyfilled function for subclassing a JavaScript object. Used internally to subclass all Handlebars functionality. This way no Handlebars objects are augmented and we aren't copying entire chunks of functionality.
+
+#### Utils.isNode
+
+Returns a boolean indicating whether the passed in object is a DOM node.
+
+#### Utils.trackNode
+
+Returns an object whose sole purpose is tracking DOM nodes. Comes with some helpful utilities attached.
+
+#### Utils.domifyExpression
+
+Transform anything passed in as the first argument into a DOM node. Handles `DOMBars.SafeString` instances and current nodes correctly.
+
+#### Utils.textifyExpression
+
+Transform anything passed in as the first argument into a text node. `DOMBars.SafeString` instances are transformed into DOM nodes and current DOM nodes are transformed into a string.
+
 ## Examples
 
 ### Subscribers
