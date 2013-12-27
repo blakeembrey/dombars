@@ -1029,8 +1029,8 @@ describe('Compiler', function () {
               function (done) {
                 var spy = sinon.spy();
 
-                DOMBars.registerHelper('helper', function () {
-                  DOMBars.VM.unsubscribe(spy);
+                DOMBars.registerHelper('helper', function (options) {
+                  options.unsubscribe(spy);
 
                   return 'helper';
                 });

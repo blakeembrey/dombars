@@ -36,7 +36,7 @@ DOMBars.unsubscribe = function (object, property, callback) {
 
 DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned object. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
 
-For custom helpers that need to be unsubscribed, a function is made available under `DOMBars.VM.unsubscribe`. Pass in the function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
+For custom helpers that need to be unsubscribed, a function is made available to helper functions through the `unsubscribe` method. Pass in a function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
 
 ### Events
 
@@ -130,7 +130,7 @@ document.body.appendChild(template.value);
 ### Helpers
 
 ```js
-DOMBars.registerHelper('currentTime', function () {
+DOMBars.registerHelper('currentTime', function (options) {
   var node = document.createTextNode(new Date().toLocaleTimeString());
 
   var interval = window.setInterval(function () {
@@ -138,7 +138,7 @@ DOMBars.registerHelper('currentTime', function () {
   }, 1000);
 
   // Use the VM unsubscribe method to register a way to remove helper listeners.
-  DOMBars.VM.unsubscribe(function () {
+  options.unsubscribe(function () {
     window.clearInterval(interval);
   });
 
