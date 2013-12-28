@@ -89,6 +89,24 @@ module.exports = function (grunt) {
     },
 
     /**
+     * Execute the test suite using Karma.
+     *
+     * @type {Object}
+     */
+    karma: {
+      options: {
+        configFile: 'karma.conf.js'
+      },
+      unit: {
+        singleRun: false,
+        background: true
+      },
+      ci: {
+        singleRun: true
+      }
+    },
+
+    /**
      * Watch for any file changes and run the supporting processes.
      *
      * @type {Object}
@@ -101,12 +119,15 @@ module.exports = function (grunt) {
       lint: {
         files: ['<%= jshint.all.src %>'],
         tasks: ['newer:jshint:all']
+      },
+      karma: {
+        files: ['lib/**/*.js', 'test/browser/**/*.js'],
+        tasks: ['karma:unit:run']
       }
     }
   });
 
-  grunt.registerTask('test',    ['jshint']);
-  grunt.registerTask('compile', ['browserify', 'uglify']);
-  grunt.registerTask('build',   ['test', 'compile']);
-  grunt.registerTask('default', ['build', 'watch']);
+  grunt.registerTask('test',    ['jshint', 'karma:ci']);
+  grunt.registerTask('build',   ['browserify', 'uglify']);
+  grunt.registerTask('default', ['build', 'karma:unit', 'watch']);
 };

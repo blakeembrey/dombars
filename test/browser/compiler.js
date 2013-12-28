@@ -1,7 +1,7 @@
 /* global describe, it, expect, beforeEach, afterEach, sinon, DOMBars */
 
 describe('Compiler', function () {
-  var fixture       = document.getElementById('fixture');
+  var fixture       = document.createElement('div');
   var prevGet       = DOMBars.get;
   var prevSubscribe = DOMBars.subscribe;
   var clock;
