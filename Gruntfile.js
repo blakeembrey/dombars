@@ -114,7 +114,7 @@ module.exports = function (grunt) {
     watch: {
       build: {
         files: ['lib/**/*.js'],
-        tasks: ['compile']
+        tasks: ['build']
       },
       lint: {
         files: ['<%= jshint.all.src %>'],
