@@ -137,7 +137,7 @@ DOMBars.registerHelper('currentTime', function (options) {
     node.textContent = new Date().toLocaleTimeString();
   }, 1000);
 
-  // Use the VM unsubscribe method to register a way to remove helper listeners.
+  // Use the unsubscribe method to completely remove helpers.
   options.unsubscribe(function () {
     window.clearInterval(interval);
   });
