@@ -12,7 +12,7 @@ module.exports = function (config) {
      *
      * @type {Array}
      */
-    frameworks: ['mocha', 'sinon-chai', 'commonjs'],
+    frameworks: ['mocha', 'sinon-chai'],
 
     /**
      * Preprocess files matching a given pattern.
@@ -20,8 +20,7 @@ module.exports = function (config) {
      * @type {Object}
      */
     preprocessors: {
-      'dist/**/*.js': ['coverage'],
-      'test/**/*.js': ['commonjs']
+      'dist/**/*.js': ['coverage']
     },
 
     /**

@@ -11,8 +11,11 @@ module.exports = (function create () {
     return Compiler.compile(input, options, db);
   };
 
+  db.precompile = function (input, options) {
+    return Compiler.precompile(input, options, db);
+  };
+
   db.create             = create;
-  db.precompile         = Compiler.precompile;
   db.AST                = AST;
   db.Compiler           = Compiler.Compiler;
   db.JavaScriptCompiler = JavaScriptCompiler;
