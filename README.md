@@ -1,22 +1,24 @@
-# dombars
+# DOMBars
 
 DOMBars is an extension of [Handlebars.js](https://github.com/wycats/handlebars.js). It keeps almost all the same semantics of Handlebars, but generates DOM objects instead of string-based templates. This is an extremely powerful concept when you consider data binding and reactive programming. By creating DOM representations of a template, we can easily keep track of all the generated nodes and update only the specific content when data changes. All of this is possible without any special markup being added to your HTML and Handlebars templates.
 
 ## Installation
 
-Installing DOMBars is simple. Multiple builds are provided in the `dist` directory, just add the required script to you site. Alternatively DOMBars is available on [npm](https://npmjs.org/package/dombars).
+Installing DOMBars is simple. Multiple builds are provided in the `dist` directory, just add the required script to you site. Alternatively, DOMBars is also available on [npm](https://npmjs.org/package/dombars).
 
 ## Usage
 
-The API is backward-compatible with Handlebars, but extends it with all the DOM-based functionality. Semantically, there is zero change; however, one thing to keep in mind is that helper functions generate DOM objects (not strings), so you can't just concatenate together and hope for the best. To achieve a similar effect, create a document fragment and return it instead.
+The API is very similar to Handlebars, but extends it with all the DOM-based goodness. Things to keep in mind is that helper function generate DOM nodes (not strings). This means no more string concatination - use document fragments instead.
+
+Another thing is that the template function and helpers don't directly return the template. Instead they return an object with some additional methods (such as `unsubscribe`) and the template output is stored under the `value` property.
 
 ### Getters
 
-To provide a custom getter function, just set `DOMBars.get` to your desired function. The function accepts two arguments, the `object` and `property`.
+To provide a custom getter function, just set `DOMBars.get` to your desired function. The function should accept two arguments, the `object` and `property`.
 
 ### Subscribers
 
-Subscriptions are used to achieve data binding. By default, the subscription is a no-op. To set up your own custom subscription function, set `DOMBars.subscribe` to the disired subsciber. The function itself accepts three arguments - `object`, `property` and `callback`. For example, to do data binding with Backbone.js:
+Subscriptions are used to achieve data binding. By default, the subscription is a no-op and does nothing. To set up your own custom subscription function, set `DOMBars.subscribe` to the desired subsciber function. The function should accept three arguments - `object`, `property` and `callback`. For example, to do data binding with Backbone.js:
 
 ```js
 DOMBars.subscribe = function (object, property, callback) {
@@ -24,7 +26,7 @@ DOMBars.subscribe = function (object, property, callback) {
 };
 ```
 
-You also need to provide an unsubscribe function under `DOMBars.unsubscribe`. This function accepts the same three arguments - `object`, `property` and `callback`. The callback is the same function that was passed in with `DOMBars.subscribe`. For example, to unsubscribe a subscription in Backbone.js:
+You should also provide an unsubscribe function under `DOMBars.unsubscribe`. This function accepts the same three arguments - `object`, `property` and `callback`. The callback is the exact same function that was passed in with `DOMBars.subscribe`. To unsubscribe a subscription in Backbone.js:
 
 ```js
 DOMBars.unsubscribe = function (object, property, callback) {
@@ -34,13 +36,17 @@ DOMBars.unsubscribe = function (object, property, callback) {
 
 ### Unsubscribing
 
-DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned object. This is important since your listeners and helpers would otherwise not know to stop listening for changes, and would result in a fairly substantial memory leak over time.
+DOMBars templates automatically unsubscribe listeners when a change happens. However, to unsubscribe the root DOM element you need to call the `unsubscribe` method on the returned object. This is important since your listeners and helpers would otherwise not know to stop listening for changes and could result in a substantial memory leak over time.
 
-For custom helpers that need to be unsubscribed, a function is made available to helper functions through the `unsubscribe` method. Pass in a function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
+For custom helpers that need to be unsubscribed, a function is made available to helper functions through the `options.unsubscribe` method in the options. Just pass in a function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
+
+### Updating Helpers
+
+Since helpers are just DOM nodes, you can update the returned helper by changing the DOM reference. This is great for performance reasons, since you just update the parts of the DOM that need changing. Another options is the `options.update` method. When called, the helper will re-render itself in place.
 
 ### Utilities
 
-DOMBars extends the built-in Handlebars utilities with some additional functionality.
+DOMBars extends the built-in Handlebars utilities with some additional functionality, available under `DOMBars.Utils`.
 
 #### Utils.uniqueId
 
@@ -97,14 +103,8 @@ document.body.appendChild(template.value);
 DOMBars.registerHelper('currentTime', function (options) {
   var node = document.createTextNode(new Date().toLocaleTimeString());
 
-  var interval = window.setInterval(function () {
-    node.textContent = new Date().toLocaleTimeString();
-  }, 1000);
-
-  // Use the unsubscribe method to completely remove helpers.
-  options.unsubscribe(function () {
-    window.clearInterval(interval);
-  });
+  // Update the time in 1 second.
+  window.setTimeout(options.update, 1000);
 
   return node;
 });
