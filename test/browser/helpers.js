@@ -1,4 +1,4 @@
-/* global DOMBars, describe, it */
+/* global DOMBars, describe, it, sinon, expect */
 
 var equal = require('../support/equal');
 
@@ -107,6 +107,83 @@ describe('Helpers', function () {
           }
         }
       })('<span>content</span>');
+    });
+  });
+
+  describe('Options', function () {
+    it('should tell us whether we are in an attribute', function () {
+      /**
+       * Throws an assertion error if the attribute is not `false`.
+       *
+       * @param  {Object} options
+       * @return {String}
+       */
+      var notAttribute = function (options) {
+        expect(options.attribute).to.be.false;
+        return 'notAttribute';
+      };
+
+      /**
+       * Throws an assertion error if the attribute is not `true`.
+       *
+       * @param  {Object} options
+       * @return {String}
+       */
+      var isAttribute = function (options) {
+        expect(options.attribute).to.be.true;
+        return 'isAttribute';
+      };
+
+      // Generate different spies for checking each position.
+      var tagSpy   = sinon.spy(isAttribute);
+      var attrSpy  = sinon.spy(isAttribute);
+      var valueSpy = sinon.spy(isAttribute);
+      var textSpy  = sinon.spy(notAttribute);
+
+      DOMBars.compile('<{{tag}} {{attr}}="{{value}}">{{text}}</{{tag}}>')({}, {
+        helpers: {
+          tag:   tagSpy,
+          attr:  attrSpy,
+          text:  textSpy,
+          value: valueSpy
+        }
+      });
+
+      expect(tagSpy).to.be.calledOnce;
+      expect(attrSpy).to.be.calledOnce;
+      expect(textSpy).to.be.calledOnce;
+      expect(valueSpy).to.be.calledOnce;
+    });
+
+    it('should re-render the helper', function (done) {
+      var i     = 0;
+      var clock = sinon.useFakeTimers();
+
+      var testHelper = sinon.spy(function (options) {
+        window.setTimeout(options.update, 100);
+        return i++;
+      });
+
+      var matches = equal('{{test}}', {}, {
+        helpers: {
+          test: testHelper
+        }
+      });
+
+      // Check that the call count is correct.
+      matches('0');
+      expect(testHelper).to.be.calledOnce;
+
+      // Run the update function and restore the default timers.
+      clock.tick(100);
+      clock.restore();
+
+      // Check the update was executed.
+      return DOMBars.VM.exec(function () {
+        matches('1');
+        expect(testHelper).to.be.calledTwice;
+        return done();
+      });
     });
   });
 });
