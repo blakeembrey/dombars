@@ -38,42 +38,6 @@ DOMBars templates automatically unsubscribe listeners when a change happens. How
 
 For custom helpers that need to be unsubscribed, a function is made available to helper functions through the `unsubscribe` method. Pass in a function that needs to be called on unsubscription, and when the helper is destroyed the unsubscribe function will be called.
 
-### Events
-
-DOMBars will emit events during the contruction of every template. This allows the creation of some amazing plugins and optimized attaching of event listeners to the DOM, since you no longer need to do DOM traversal.
-
-To listen to events, you can subscribe using the regular `DOMBars.on` or `DOMBars.once` for a callback that should only run once.
-
-**createElement** (el)
-
-Triggered any time an element in the template is created. This occurs before the element has any attributes or is appended to the DOM.
-
-**createComment** (el)
-
-Triggered any time a comment node is created from the template. This occurs before the comment has been appended to the DOM.
-
-**setAttribute** (el, name, value)
-
-Triggered when an attribute is set on an element in the template. This occurs before the attribute is set, so it is possible to read the previous attribute (if any).
-
-**removeAttribute** (el, name)
-
-Triggered when an attribute is removed from an element in the template. This occurs right before the attribute is removed.
-
-**appendChild** (parent, child)
-
-Triggered any time a child node is appended to the template. This occurs after the child has been appended to the parent, allowing access to the `parentNode` property.
-
-### Helpers
-
-#### Attributes
-
-A helper can check the context in which it is being compiled by checking the boolean `attribute` property on the passed in `options`.
-
-#### Block helpers
-
-The `fn` and `inverse` properties of block helpers return an object the same as the root template function. This allows you to unsubscribe individual block helpers if you happen to call it multiple times.
-
 ### Utilities
 
 DOMBars extends the built-in Handlebars utilities with some additional functionality.
