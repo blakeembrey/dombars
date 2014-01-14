@@ -12,7 +12,7 @@ module.exports = function (config) {
      *
      * @type {Array}
      */
-    frameworks: ['mocha', 'sinon-chai'],
+    frameworks: ['mocha', 'sinon-chai', 'commonjs'],
 
     /**
      * Preprocess files matching a given pattern.
@@ -20,7 +20,8 @@ module.exports = function (config) {
      * @type {Object}
      */
     preprocessors: {
-      'dist/**/*.js': ['coverage']
+      'dist/**/*.js': ['coverage'],
+      'test/**/*.js': ['commonjs']
     },
 
     /**
@@ -30,7 +31,8 @@ module.exports = function (config) {
      */
     files: [
       'dist/dombars.js',
-      'test/browser/**.js',
+      'test/browser/**/*.js',
+      'test/support/**/*.js',
       'test/fixtures/**/*'
     ],
 
@@ -97,7 +99,7 @@ module.exports = function (config) {
      *
      * @type {Array}
      */
-    browsers: ['Chrome', 'PhantomJS'],
+    browsers: ['Chrome', 'PhantomJS', 'Firefox', 'Safari'],
 
     /**
      * If a browser does not capture within a given timeout, kill it.
