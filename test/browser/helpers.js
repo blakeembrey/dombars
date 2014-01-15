@@ -159,11 +159,22 @@ describe('Helpers', function () {
       var i     = 0;
       var clock = sinon.useFakeTimers();
 
+      /**
+       * Execute a simple helper that updates itself after 100ms.
+       *
+       * @param  {Object} options
+       * @return {Number}
+       */
       var testHelper = sinon.spy(function (options) {
         window.setTimeout(options.update, 100);
         return i++;
       });
 
+      /**
+       * Check that the template output DOM matches a string template.
+       *
+       * @type {Function}
+       */
       var matches = equal('{{test}}', {}, {
         helpers: {
           test: testHelper
@@ -182,6 +193,61 @@ describe('Helpers', function () {
       return DOMBars.VM.exec(function () {
         matches('1');
         expect(testHelper).to.be.calledTwice;
+        return done();
+      });
+    });
+
+    it('should re-render the helper with subexpressions', function (done) {
+      var i     = 0;
+      var clock = sinon.useFakeTimers();
+
+      /**
+       * Execute a simple helper that updates itself after 100ms.
+       *
+       * @param  {Object} options
+       * @return {Number}
+       */
+      var testHelper = sinon.spy(function (options) {
+        window.setTimeout(options.update, 100);
+        return i++;
+      });
+
+      /**
+       * Solely used for proxying the value to the DOM.
+       *
+       * @param  {*} value
+       * @return {*}
+       */
+      var proxyHelper = sinon.spy(function (value) {
+        return value;
+      });
+
+      /**
+       * Check that the template output DOM matches a string template.
+       *
+       * @type {Function}
+       */
+      var matches = equal('{{proxy (test)}}', {}, {
+        helpers: {
+          test:  testHelper,
+          proxy: proxyHelper
+        }
+      });
+
+      // Check that the call count is correct.
+      matches('0');
+      expect(testHelper).to.be.calledOnce;
+      expect(proxyHelper).to.be.calledOnce;
+
+      // Run the update function and restore the default timers.
+      clock.tick(100);
+      clock.restore();
+
+      // Check the update was executed.
+      return DOMBars.VM.exec(function () {
+        matches('1');
+        expect(testHelper).to.be.calledTwice;
+        expect(proxyHelper).to.be.calledTwice;
         return done();
       });
     });

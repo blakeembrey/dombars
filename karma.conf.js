@@ -20,7 +20,7 @@ module.exports = function (config) {
      * @type {Object}
      */
     preprocessors: {
-      'dist/**/*.js': ['coverage'],
+      'dist/**/*.js': [],
       'test/**/*.js': ['commonjs']
     },
 
