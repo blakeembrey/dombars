@@ -251,5 +251,47 @@ describe('Helpers', function () {
         return done();
       });
     });
+
+    it('should re-render helpers inside attributes', function (done) {
+      var i     = 0;
+      var clock = sinon.useFakeTimers();
+
+      /**
+       * Execute a simple helper that updates itself after 100ms.
+       *
+       * @param  {Object} options
+       * @return {Number}
+       */
+      var testHelper = sinon.spy(function (options) {
+        window.setTimeout(options.update, 100);
+        return i++;
+      });
+
+      /**
+       * Check that the template output DOM matches a string template.
+       *
+       * @type {Function}
+       */
+      var matches = equal('<div class="test {{test}}"></div>', {}, {
+        helpers: {
+          test: testHelper
+        }
+      });
+
+      // Check that the call count is correct.
+      matches('<div class="test 0"></div>');
+      expect(testHelper).to.be.calledOnce;
+
+      // Run the update function and restore the default timers.
+      clock.tick(100);
+      clock.restore();
+
+      // Check the update was executed.
+      return DOMBars.VM.exec(function () {
+        matches('<div class="test 1"></div>');
+        expect(testHelper).to.be.calledTwice;
+        return done();
+      });
+    });
   });
 });

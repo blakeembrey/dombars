@@ -14,7 +14,17 @@ Another thing is that the template function and helpers don't directly return th
 
 ### Getters
 
-To provide a custom getter function, just set `DOMBars.get` to your desired function. The function should accept two arguments, the `object` and `property`.
+To provide a custom getter function, just set `DOMBars.get` to your desired function. The function should accept two arguments, the `object` and `property`. Using DOMBars with Backbone.js is as simple as:
+
+```js
+DOMBars.get = function (object, property) {
+  if (object instanceof Backbone.Model) {
+    return object.get(property);
+  }
+
+  return object[property];
+};
+```
 
 ### Subscribers
 
