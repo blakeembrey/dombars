@@ -7,19 +7,47 @@ var equal = require('./equal');
  *
  * @return {Function}
  */
-module.exports = function (template, context) {
-  var subscribe     = DOMBars.subscribe;
+module.exports = function (template, context, options) {
   var subscriptions = [];
 
-  // Just update every subscription.
-  DOMBars.subscribe = function (obj, prop, fn) {
+  /**
+   * Custom get function to handle updates.
+   *
+   * @param  {Object} obj
+   * @param  {String} prop
+   * @return {*}
+   */
+  var get = function (obj, prop) {
+    if (obj === context && 'update' in get) {
+      return get.update[prop];
+    }
+
+    return obj[prop];
+  };
+
+  /**
+   * Custom subscriber to just update everything.
+   *
+   * @param {Object}   obj
+   * @param {String}   prop
+   * @param {Function} fn
+   */
+  var subscribe = function (obj, prop, fn) {
     subscriptions.push(fn);
   };
 
-  var check = equal.apply(this, arguments);
+  // Extend the passed in options with custom subscription data.
+  DOMBars.Utils.extend(options || (options = {}), {
+    get:       get,
+    subscribe: subscribe
+  });
 
-  // Reset the subscribe function back to its original functionality.
-  DOMBars.subscribe = subscribe;
+  /**
+   * Check the values match expectations.
+   *
+   * @type {Function}
+   */
+  var check = equal.call(this, template, context, options);
 
   /**
    * Trigger an asynchonous DOM update with a new object.
@@ -29,16 +57,7 @@ module.exports = function (template, context) {
    * @param {Function} done
    */
   var update = function (match, update, done) {
-    var get = DOMBars.get;
-
-    // Get the property from the update over the old object.
-    DOMBars.get = function (obj, prop) {
-      if (obj === context) {
-        return update[prop];
-      }
-
-      return obj[prop];
-    };
+    get.update = update;
 
     // Iterate over every subscription and update.
     for (var i = 0; i < subscriptions.length; i++) {
@@ -51,8 +70,6 @@ module.exports = function (template, context) {
         check(match);
       } catch (e) {
         return done(e);
-      } finally {
-        DOMBars.get = get;
       }
 
       return done();
@@ -60,7 +77,7 @@ module.exports = function (template, context) {
   };
 
   /**
-   * Returns a function for the regular synchonous check. It in turn return the
+   * Returns a function for the regular synchonous check. It also returns the
    * async test function.
    *
    * @return {Function}

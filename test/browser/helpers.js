@@ -102,7 +102,7 @@ describe('Helpers', function () {
         helpers: {
           test: function (options) {
             var el = document.createElement('span');
-            el.appendChild(options.fn().value);
+            el.appendChild(options.fn());
             return el;
           }
         }

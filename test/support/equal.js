@@ -74,7 +74,7 @@ module.exports = function (template) {
 
   // Append the compiled template directly to the div.
   output.appendChild(
-    DOMBars.compile(template).apply(null, __slice.call(arguments, 1)).value
+    DOMBars.compile(template).apply(null, __slice.call(arguments, 1))
   );
 
   /**

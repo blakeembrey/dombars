@@ -1,4 +1,4 @@
-/* global describe, it */
+/* global describe, it, DOMBars */
 
 var equal = require('../support/equal');
 
@@ -19,6 +19,14 @@ describe('Partials', function () {
         test: function () {
           return 'test';
         }
+      }
+    })('<div class="test"></div>');
+  });
+
+  it('should compile template partials', function () {
+    equal('{{> test}}', {}, {
+      partials: {
+        test: DOMBars.compile('<div class="test"></div>')
       }
     })('<div class="test"></div>');
   });

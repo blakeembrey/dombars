@@ -104,7 +104,7 @@ var template = DOMBars.compile(
 });
 
 // Append the template directly to the body element and watch the magic happen.
-document.body.appendChild(template.value);
+document.body.appendChild(template);
 ```
 
 ### Helpers
@@ -121,7 +121,7 @@ DOMBars.registerHelper('currentTime', function (options) {
 
 var template = DOMBars.compile('{{currentTime}}')();
 
-document.body.appendChild(template.value);
+document.body.appendChild(template);
 ```
 
 ## Plugins

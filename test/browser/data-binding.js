@@ -152,7 +152,7 @@ describe('Data Binding', function () {
           helper: function (value, options) {
             return options.fn({
               value: value
-            }).value;
+            });
           }
         }
       }
