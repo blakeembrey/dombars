@@ -43,15 +43,23 @@ var matchingNodes = function (a, b) {
     }
 
     // Iterate only over the children (avoiding text nodes).
-    for (var j = 0; j < a.childNodes.length; j++) {
-      // Skip over text nodes. These will be inaccurate in our templates.
-      if (a.childNodes[i].nodeType === 3) {
+    for (var j = 0, k = 0; j < a.childNodes.length;) {
+      if (a.childNodes[j].nodeType === 3) {
+        j++;
         continue;
       }
 
-      if (!matchingNodes(a.childNodes[j], b.childNodes[j])) {
+      if (b.childNodes[k].nodeType === 3) {
+        k++;
+        continue;
+      }
+
+      if (!matchingNodes(a.childNodes[j], b.childNodes[k])) {
         return false;
       }
+
+      j++;
+      k++;
     }
   }
 
