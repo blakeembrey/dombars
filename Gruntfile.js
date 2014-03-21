@@ -4,9 +4,10 @@
  * @type {Object}
  */
 var debugOptions = {
-  debug:      true,
-  transform:  [],
-  standalone: 'DOMBars'
+  debug: true,
+  bundleOptions: {
+    standalone: 'DOMBars'
+  }
 };
 
 /**
@@ -15,8 +16,10 @@ var debugOptions = {
  * @type {Object}
  */
 var minifyOptions = {
-  transform:  ['uglifyify'],
-  standalone: 'DOMBars'
+  transform: ['uglifyify'],
+  bundleOptions: {
+    standalone: 'DOMBars'
+  }
 };
 
 /**
@@ -49,23 +52,17 @@ module.exports = function (grunt) {
      */
     browserify: {
       debug: {
-        src:  'dombars.js',
-        dest: 'dist/dombars.js',
+        files: {
+          'dist/dombars.js':         'dombars.js',
+          'dist/dombars.runtime.js': 'runtime.js'
+        },
         options: debugOptions
       },
       minify: {
-        src:  'dombars.js',
-        dest: 'dist/dombars.min.js',
-        options: minifyOptions
-      },
-      'debug-runtime': {
-        src: 'runtime.js',
-        dest: 'dist/dombars.runtime.js',
-        options: debugOptions
-      },
-      'minify-runtime': {
-        src:  'runtime.js',
-        dest: 'dist/dombars.runtime.min.js',
+        files: {
+          'dist/dombars.min.js':         'dombars.js',
+          'dist/dombars.runtime.min.js': 'runtime.js'
+        },
         options: minifyOptions
       }
     },
