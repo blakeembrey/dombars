@@ -206,7 +206,7 @@ var raf   = _dereq_('./raf');
  *
  * @type {Object}
  */
-var attrProps = {
+var ATTRIBUTE_PROPS = {
   INPUT: {
     value:   'value',
     checked: 'checked'
@@ -469,11 +469,13 @@ VM.setTagName = function (node, tagName) {
   // Copy all the attributes to the new node.
   for (var i = 0; i < node.attributes.length; i++) {
     var attribute = node.attributes[i];
-    VM.setAttribute(newNode, attribute.name, attribute.value);
+    newNode.setAttribute(attribute.name, attribute.value);
   }
 
-  // Replace the node position in the place.
-  node.parentNode.replaceChild(newNode, node);
+  // Replace the node position in place.
+  if (node.parentNode) {
+    node.parentNode.replaceChild(newNode, node);
+  }
 
   return newNode;
 };
@@ -491,8 +493,8 @@ VM.removeAttribute = function (el, name) {
   el.removeAttribute(name);
 
   // Unset the DOM property when the attribute is removed.
-  if (attrProps[el.tagName] && attrProps[el.tagName][name]) {
-    el[attrProps[el.tagName][name]] = null;
+  if (ATTRIBUTE_PROPS[el.tagName] && ATTRIBUTE_PROPS[el.tagName][name]) {
+    el[ATTRIBUTE_PROPS[el.tagName][name]] = null;
   }
 };
 
@@ -513,8 +515,8 @@ VM.setAttribute = function (el, name, value) {
   el.setAttribute(name, value === true ? name : value);
 
   // Update the DOM property when the attribute changes.
-  if (attrProps[el.tagName] && attrProps[el.tagName][name]) {
-    el[attrProps[el.tagName][name]] = value;
+  if (ATTRIBUTE_PROPS[el.tagName] && ATTRIBUTE_PROPS[el.tagName][name]) {
+    el[ATTRIBUTE_PROPS[el.tagName][name]] = value;
   }
 };
 
@@ -605,7 +607,10 @@ var createElement = function (fn, cb) {
  * @param {Node} child
  */
 var appendChild = function (parent, child) {
-  child && parent.appendChild(child);
+  // Catch errors that occur from trying to append content to a void element.
+  try {
+    child && parent.appendChild(child);
+  } catch (e) {}
 };
 
 /**
