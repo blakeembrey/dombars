@@ -891,78 +891,69 @@ module.exports = _dereq_('handlebars/dist/cjs/handlebars/exception')['default'];
 },{"handlebars/dist/cjs/handlebars/exception":26}],11:[function(_dereq_,module,exports){
 (function (global){
 /**
- * Return the current timestamp integer.
- *
- * @return {Number}
+ * Wrap in an anonymous function to alias timer utilities.
  */
-var currentTime = global.Date.now || (function () {
-  var Constuctor = global.Date;
+(function (setTimeout, clearTimeout, Date) {
+  /**
+   * Fallback animation frame implementation.
+   *
+   * @return {Function}
+   */
+  var fallback = function () {
+    /**
+     * Return the current timestamp integer.
+     */
+    var now = Date.now || function () {
+      return new Date().getTime();
+    };
 
-  return function () {
-    return new Constuctor().getTime();
+    // Keep track of the previous "animation frame" manually.
+    var prev = now();
+
+    return function (fn) {
+      var curr = now();
+      var ms   = Math.max(0, 16 - (curr - prev));
+      var req  = setTimeout(fn, ms);
+
+      prev = curr;
+
+      return req;
+    };
   };
-})();
 
-/**
- * Keep local references to the timeout functions. This stops utilities like
- * Sinon.js from breaking the implementation.
- *
- * @type {Function}
- */
-var setTimer   = global.setTimeout;
-var clearTimer = global.clearTimeout;
+  /**
+   * Expose `requestAnimationFrame`.
+   *
+   * @type {Function}
+   */
+  exports = module.exports = global.requestAnimationFrame ||
+    global.webkitRequestAnimationFrame ||
+    global.mozRequestAnimationFrame ||
+    global.msRequestAnimationFrame ||
+    global.oRequestAnimationFrame ||
+    fallback();
 
-/**
- * Fallback animation frame implementation.
- *
- * @return {Function}
- */
-var fallback = function () {
-  var prev = currentTime();
+  /**
+   * Cancel the animation frame.
+   *
+   * @type {Function}
+   */
+  var cancel = global.cancelAnimationFrame ||
+    global.webkitCancelAnimationFrame ||
+    global.mozCancelAnimationFrame ||
+    global.msCancelAnimationFrame ||
+    global.oCancelAnimationFrame ||
+    clearTimeout;
 
-  return function (fn) {
-    var curr = currentTime();
-    var ms   = Math.max(0, 16 - (curr - prev));
-    var req  = setTimer(fn, ms);
-
-    prev = curr;
-
-    return req;
+  /**
+   * Cancel an animation frame.
+   *
+   * @param {Number} id
+   */
+  exports.cancel = function (id) {
+    cancel(id);
   };
-};
-
-/**
- * Expose `requestAnimationFrame`.
- *
- * @type {Function}
- */
-exports = module.exports = global.requestAnimationFrame ||
-  global.webkitRequestAnimationFrame ||
-  global.mozRequestAnimationFrame ||
-  global.msRequestAnimationFrame ||
-  global.oRequestAnimationFrame ||
-  fallback();
-
-/**
- * Cancel the animation frame.
- *
- * @type {Function}
- */
-var cancel = global.cancelAnimationFrame ||
-  global.webkitCancelAnimationFrame ||
-  global.mozCancelAnimationFrame ||
-  global.msCancelAnimationFrame ||
-  global.oCancelAnimationFrame ||
-  clearTimer;
-
-/**
- * Cancel an animation frame.
- *
- * @param {Number} id
- */
-exports.cancel = function (id) {
-  cancel.call(global, id);
-};
+})(setTimeout, clearTimeout, Date);
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],12:[function(_dereq_,module,exports){
