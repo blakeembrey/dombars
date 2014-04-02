@@ -99,7 +99,7 @@ module.exports = function (config) {
      *
      * @type {Array}
      */
-    browsers: ['Chrome', 'PhantomJS', 'Firefox', 'Safari'],
+    browsers: ['Chrome', 'PhantomJS', 'Firefox'],
 
     /**
      * If a browser does not capture within a given timeout, kill it.
