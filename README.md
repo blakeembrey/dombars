@@ -1,5 +1,7 @@
 # DOMBars
 
+**This project is deprecated. It was a fun experiment and awesome project to work with, but I no longer have the time or money to contribute full time.**
+
 DOMBars is an extension of [Handlebars.js](https://github.com/wycats/handlebars.js). It keeps almost all the same semantics of Handlebars, but generates DOM objects instead of string-based templates. This is an extremely powerful concept when you consider data binding and reactive programming. By creating DOM representations of a template, we can easily keep track of all the generated nodes and update only the specific content when data changes. All of this is possible without any special markup being added to your HTML and Handlebars templates.
 
 ## Installation
